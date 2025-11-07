@@ -1,28 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MrBudget</title>
-    <link rel="manifest" href="manifest.json">
+    <!-- Inter font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <style>
         /* --- CSS Reset & Base --- */
         :root {
+            /* Light Theme (Default) */
             --gradient-start: #667eea;
             --gradient-end: #764ba2;
             --primary-text: #2d3748;
+            /* Dark Gray */
             --secondary-text: #718096;
+            /* Medium Gray */
             --bg-color: #f7fafc;
+            /* Light Gray */
             --card-bg: #ffffff;
+            /* White */
             --border-color: #e2e8f0;
-            --success-color: #38a169; /* green-600 */
-            --danger-color: #e53e3e; /* red-600 */
+            /* Light Gray Border */
+            --input-bg: #f7fafc;
+            /* Same as bg */
+            --success-color: #38a169;
+            /* Green */
+            --danger-color: #e53e3e;
+            /* Red */
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        body[data-theme='dark'] {
+            --primary-text: #e2e8f0;
+            /* Light Gray */
+            --secondary-text: #a0aec0;
+            /* Medium Gray */
+            --bg-color: #1a202c;
+            /* Dark Blue/Gray */
+            --card-bg: #2d3748;
+            /* Lighter Blue/Gray */
+            --border-color: #4a5568;
+            /* Gray Border */
+            --input-bg: #1a202c;
+            /* Same as bg */
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
         }
 
         * {
@@ -31,24 +59,30 @@
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
-            overflow: hidden; /* Prevents bouncing on mobile */
+            overflow: hidden;
+            /* Prevents bouncing on mobile */
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--primary-text);
-            -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
+            -webkit-tap-highlight-color: transparent;
+            /* Remove tap highlight */
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
 
         /* --- App Layout --- */
         #app {
             display: flex;
             flex-direction: column;
-            height: 100vh; /* Use 100vh for web view */
-            height: 100dvh; /* Dynamic viewport height for mobile browsers */
+            height: 100vh;
+            /* Use 100vh for web view */
+            height: 100dvh;
+            /* Dynamic viewport height for mobile browsers */
         }
 
         header {
@@ -62,14 +96,21 @@
             font-weight: 600;
             box-shadow: var(--shadow);
             z-index: 100;
-            -webkit-user-select: none; /* Disable text selection */
+            -webkit-user-select: none;
+            /* Disable text selection */
             user-select: none;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
-        #export-btn {
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .header-btn {
             background: none;
             border: none;
             color: white;
@@ -77,25 +118,44 @@
             margin-right: -0.5rem;
             cursor: pointer;
         }
-        
-        #export-btn svg {
+
+        .header-btn svg {
             width: 1.5rem;
             height: 1.5rem;
             stroke-width: 2;
         }
 
+        #theme-toggle-btn .sun-icon {
+            display: none;
+        }
+
+        #theme-toggle-btn .moon-icon {
+            display: block;
+        }
+
+        body[data-theme='dark'] #theme-toggle-btn .sun-icon {
+            display: block;
+        }
+
+        body[data-theme='dark'] #theme-toggle-btn .moon-icon {
+            display: none;
+        }
+
         main {
             flex-grow: 1;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-            padding: 1rem 1rem 6rem 1rem; /* Padding for header and footer */
+            -webkit-overflow-scrolling: touch;
+            /* Smooth scrolling on iOS */
+            padding: 1rem 1rem 6rem 1rem;
+            /* Padding for header and footer */
         }
 
-        main > section {
-            display: none; /* Hidden by default */
+        main>section {
+            display: none;
+            /* Hidden by default */
         }
 
-        main > section.active {
+        main>section.active {
             display: block;
         }
 
@@ -108,10 +168,11 @@
             justify-content: space-around;
             background-color: var(--card-bg);
             border-top: 1px solid var(--border-color);
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
             z-index: 100;
             -webkit-user-select: none;
             user-select: none;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
         }
 
         .tab-btn {
@@ -130,21 +191,23 @@
             align-items: center;
             gap: 2px;
         }
-        
+
         .tab-btn svg {
             width: 1.5rem;
             height: 1.5rem;
             stroke-width: 1.5;
         }
-        
+
         .tab-btn.active {
             color: var(--gradient-start);
             border-top: 2px solid var(--gradient-start);
-            padding-top: calc(0.75rem - 2px); /* Adjust padding for border */
+            padding-top: calc(0.75rem - 2px);
+            /* Adjust padding for border */
         }
 
         .tab-btn:active {
-            background-color: #f4f4f5; /* Slight feedback on tap */
+            background-color: var(--bg-color);
+            /* Slight feedback on tap */
         }
 
         /* --- Home View --- */
@@ -180,6 +243,7 @@
             margin-bottom: 1rem;
             box-shadow: var(--shadow);
             text-align: center;
+            transition: background-color 0.2s ease;
         }
 
         .total-display .label {
@@ -200,8 +264,8 @@
             gap: 0.5rem;
             text-align: center;
         }
-        
-        .total-grid > div {
+
+        .total-grid>div {
             padding: 0.25rem;
         }
 
@@ -210,16 +274,16 @@
             color: var(--secondary-text);
             margin-bottom: 0.25rem;
         }
-        
+
         .total-grid .amount {
             font-size: 1.125rem;
             font-weight: 700;
         }
-        
+
         .total-grid .amount.spent {
             color: var(--danger-color);
         }
-        
+
         .total-grid .amount.remaining {
             color: var(--success-color);
         }
@@ -238,17 +302,18 @@
             box-shadow: var(--shadow);
             padding: 1rem;
             margin-bottom: 0.75rem;
-            transition: opacity 0.3s ease, transform 0.2s ease;
+            transition: opacity 0.3s ease, transform 0.2s ease, background-color 0.2s ease;
         }
-        
+
         .budget-card:active {
-            transform: scale(0.98); /* Tap feedback */
+            transform: scale(0.98);
+            /* Tap feedback */
         }
 
         .budget-card.checked {
             opacity: 0.6;
         }
-        
+
         .budget-card.checked .item-name,
         .budget-card.checked .item-category,
         .budget-card.checked .item-date {
@@ -262,7 +327,8 @@
             width: 1.5rem;
             height: 1.5rem;
             border: 2px solid var(--border-color);
-            border-radius: 0.375rem; /* Rounded square */
+            border-radius: 0.375rem;
+            /* Rounded square */
             cursor: pointer;
             flex-shrink: 0;
             transition: all 0.2s ease;
@@ -273,20 +339,23 @@
         .occurrence-checkbox::before {
             content: '';
             display: block;
-            width: 0.4rem;  /* Tick width */
-            height: 0.8rem; /* Tick height */
+            width: 0.4rem;
+            /* Tick width */
+            height: 0.8rem;
+            /* Tick height */
             border: solid white;
             border-width: 0 3px 3px 0;
             transform: rotate(45deg) scale(0);
             transition: transform 0.2s ease;
-            margin-top: -2px; /* Center tick */
+            margin-top: -2px;
+            /* Center tick */
         }
-        
+
         .occurrence-checkbox:checked {
             background-color: var(--success-color);
             border-color: var(--success-color);
         }
-        
+
         .occurrence-checkbox:checked::before {
             transform: rotate(45deg) scale(1);
         }
@@ -302,9 +371,26 @@
             gap: 0 1rem;
         }
 
-        .item-name { grid-area: name; font-weight: 600; font-size: 1rem; }
-        .item-category { grid-area: category; font-size: 0.875rem; color: var(--secondary-text); }
-        .item-date { grid-area: date; font-size: 0.875rem; color: var(--gradient-start); font-weight: 500; margin-top: 0.25rem; }
+        .item-name {
+            grid-area: name;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .item-category {
+            grid-area: category;
+            font-size: 0.875rem;
+            color: var(--secondary-text);
+        }
+
+        .item-date {
+            grid-area: date;
+            font-size: 0.875rem;
+            color: var(--gradient-start);
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+
         .item-amount {
             grid-area: amount;
             font-weight: 600;
@@ -312,7 +398,7 @@
             color: var(--primary-text);
             text-align: right;
         }
-        
+
         /* --- Items & Categories View --- */
         .list-card {
             background-color: var(--card-bg);
@@ -323,21 +409,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background-color 0.2s ease;
         }
-        
+
         .list-card .info .title {
             font-weight: 600;
             font-size: 1rem;
             margin-bottom: 0.25rem;
         }
-        
+
         .list-card .info .details {
             font-size: 0.875rem;
             color: var(--secondary-text);
             text-transform: capitalize;
             line-height: 1.4;
         }
-        
+
         .list-card .info .details .end-date {
             color: var(--danger-color);
             font-weight: 500;
@@ -349,6 +436,7 @@
             border-radius: 0.5rem;
             box-shadow: var(--shadow);
             margin-bottom: 0.75rem;
+            transition: background-color 0.2s ease;
         }
 
         .category-header {
@@ -357,6 +445,7 @@
             align-items: center;
             padding: 1rem;
             border-bottom: 1px solid var(--border-color);
+            transition: border-color 0.2s ease;
         }
 
         .category-header .title {
@@ -375,10 +464,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.5rem 0.5rem 0.5rem 1.5rem; /* Indent */
+            padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+            /* Indent */
             border-radius: 0.375rem;
         }
-        
+
         .subcategory-item:hover {
             background-color: var(--bg-color);
         }
@@ -387,7 +477,7 @@
             font-size: 0.9rem;
             color: var(--secondary-text);
         }
-        
+
         .list-card .actions,
         .category-header .actions,
         .subcategory-item .actions {
@@ -396,7 +486,7 @@
             flex-shrink: 0;
             padding-left: 0.5rem;
         }
-        
+
         .edit-btn,
         .delete-btn {
             background: none;
@@ -406,7 +496,7 @@
             color: var(--secondary-text);
             transition: color 0.2s ease;
         }
-        
+
         .edit-btn:hover {
             color: var(--gradient-start);
         }
@@ -414,14 +504,15 @@
         .delete-btn:hover {
             color: var(--danger-color);
         }
-        
+
         .edit-btn svg,
         .delete-btn svg {
             width: 1.25rem;
             height: 1.25rem;
-            pointer-events: none; /* Pass clicks to button */
+            pointer-events: none;
+            /* Pass clicks to button */
         }
-        
+
         .subcategory-analysis {
             list-style: none;
             padding: 0.75rem 0 0 0;
@@ -430,8 +521,9 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
+            transition: border-color 0.2s ease;
         }
-        
+
         .subcategory-analysis li {
             display: flex;
             justify-content: space-between;
@@ -439,11 +531,12 @@
             font-size: 0.875rem;
             color: var(--secondary-text);
         }
-        
+
         .subcategory-analysis li span:first-child {
-            padding-left: 1rem; /* Indent */
+            padding-left: 1rem;
+            /* Indent */
         }
-        
+
         .subcategory-analysis li span:last-child {
             font-weight: 500;
             color: var(--primary-text);
@@ -455,21 +548,21 @@
             padding: 3rem 1rem;
             color: var(--secondary-text);
         }
-        
+
         .empty-state svg {
             width: 4rem;
             height: 4rem;
             margin-bottom: 1rem;
             opacity: 0.5;
         }
-        
+
         .empty-state .title {
             font-size: 1.125rem;
             font-weight: 600;
             color: var(--primary-text);
             margin-bottom: 0.25rem;
         }
-        
+
         .empty-state .message {
             font-size: 0.875rem;
         }
@@ -477,7 +570,8 @@
         /* --- FAB (Floating Action Button) --- */
         .fab-container {
             position: fixed;
-            bottom: 5rem; /* Above tab bar */
+            bottom: 5rem;
+            /* Above tab bar */
             right: 1.5rem;
             z-index: 200;
             -webkit-user-select: none;
@@ -486,7 +580,8 @@
 
         .fab-menu {
             position: absolute;
-            bottom: 4.5rem; /* Above main FAB */
+            bottom: 4.5rem;
+            /* Above main FAB */
             right: 0.25rem;
             display: flex;
             flex-direction: column;
@@ -503,7 +598,7 @@
             opacity: 1;
             visibility: visible;
         }
-        
+
         .fab-menu-item {
             display: flex;
             align-items: center;
@@ -517,8 +612,9 @@
             font-weight: 500;
             cursor: pointer;
             white-space: nowrap;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
-        
+
         .fab-menu-item svg {
             width: 1.25rem;
             height: 1.25rem;
@@ -539,7 +635,7 @@
             cursor: pointer;
             transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        
+
         #fab:active {
             transform: scale(0.95);
         }
@@ -549,7 +645,7 @@
             height: 1.5rem;
             transition: transform 0.2s ease-out;
         }
-        
+
         .fab-container.open #fab svg {
             transform: rotate(45deg);
         }
@@ -563,7 +659,8 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 500;
-            display: none; /* Hidden by default */
+            display: none;
+            /* Hidden by default */
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -579,31 +676,20 @@
             left: 50%;
             width: calc(100% - 2rem);
             max-width: 400px;
-            max-height: 90vh;
-            overflow-y: auto;
             background-color: var(--card-bg);
             border-radius: 0.75rem;
             box-shadow: var(--shadow-lg);
             transform: translate(-50%, -50%) scale(0.95);
             opacity: 0;
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
         }
 
         .modal-overlay.active .modal-content {
             transform: translate(-50%, -50%) scale(1);
             opacity: 1;
-        }
-        
-        /* Specific modal content styling */
-        .modal-content-flex {
-            display: flex;
-            flex-direction: column;
-            max-height: 90vh;
-        }
-        
-        .modal-content-flex .modal-body {
-            overflow-y: auto;
-            flex-grow: 1;
         }
 
         .modal-header {
@@ -614,77 +700,93 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
+            transition: border-color 0.2s ease;
         }
 
         .modal-body {
             padding: 1.5rem;
+            overflow-y: auto;
+            flex-grow: 1;
         }
-        
+
         .modal-footer {
             padding: 1rem 1.5rem;
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: flex-end;
             gap: 0.5rem;
+            flex-shrink: 0;
+            transition: border-color 0.2s ease;
         }
 
         .form-group {
             margin-bottom: 1rem;
         }
-        
+
         .form-group label {
             display: block;
             font-size: 0.875rem;
             font-weight: 500;
             margin-bottom: 0.5rem;
         }
-        
+
         .form-control {
             width: 100%;
             padding: 0.75rem;
             font-size: 1rem;
             border: 1px solid var(--border-color);
             border-radius: 0.375rem;
-            background-color: var(--bg-color);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            background-color: var(--input-bg);
+            color: var(--primary-text);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
         }
-        
+
         .form-control:focus {
             outline: none;
             border-color: var(--gradient-start);
             box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
         }
-        
+
         .form-control:disabled {
             background-color: var(--border-color);
             opacity: 0.7;
             cursor: not-allowed;
         }
-        
-        /* --- Export Modal Specific --- */
-        #export-data-textarea {
-            width: 100%;
+
+        /* --- Import/Export Modal Specific --- */
+        textarea.form-control {
             height: 200px;
             font-family: monospace;
             font-size: 0.8rem;
             resize: none;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 0.375rem;
-            padding: 0.5rem;
         }
-        
-        .export-footer {
+
+        #import-message {
+            font-size: 0.875rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        #import-message.success {
+            color: var(--success-color);
+        }
+
+        #import-message.error {
+            color: var(--danger-color);
+        }
+
+        .modal-footer-spaced {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
-        .export-footer .btn-group {
+
+        .btn-group {
             display: flex;
             gap: 0.5rem;
         }
-        
+
         /* Buttons */
         .btn {
             padding: 0.6rem 1.25rem;
@@ -698,41 +800,41 @@
             align-items: center;
             gap: 0.35rem;
         }
-        
+
         .btn svg {
             width: 1rem;
             height: 1rem;
             stroke-width: 2;
         }
-        
+
         .btn-primary {
             background-image: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
             color: white;
         }
-        
+
         .btn-primary:hover {
             opacity: 0.9;
         }
-        
+
         .btn-secondary {
             background-color: var(--card-bg);
             color: var(--primary-text);
             border: 1px solid var(--border-color);
         }
-        
+
         .btn-secondary:hover {
             background-color: var(--bg-color);
         }
-        
+
         .btn-danger {
             background-color: var(--danger-color);
             color: white;
         }
-        
+
         .btn-danger:hover {
             background-color: #c53030;
         }
-        
+
         .close-btn {
             background: none;
             border: none;
@@ -743,20 +845,48 @@
             padding: 0;
             line-height: 1;
         }
-
     </style>
 </head>
-<body>
+
+<body data-theme="light">
 
     <div id="app">
+        <!-- --- App Header --- -->
         <header>
             <span id="app-header">MrBudget</span>
-            <button id="export-btn" aria-label="Export Data">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-            </button>
+            <div class="header-controls">
+                <button id="theme-toggle-btn" class="header-btn" aria-label="Toggle Theme">
+                    <svg class="moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                        </path>
+                    </svg>
+                    <svg class="sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                        </path>
+                    </svg>
+                </button>
+                <button id="import-btn" class="header-btn" aria-label="Import Data">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                </button>
+                <button id="export-btn" class="header-btn" aria-label="Export Data">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                    </svg>
+                </button>
+            </div>
         </header>
 
+        <!-- --- Main Content (Views) --- -->
         <main>
+            <!-- Home View -->
             <section id="home-view" class="active">
                 <div class="filter-tabs">
                     <button class="filter-btn" data-filter="previous">Previous</button>
@@ -764,88 +894,140 @@
                     <button class="filter-btn" data-filter="next-month">Next Month</button>
                 </div>
                 <div class="total-display" id="total-display-container">
-                    </div>
+                    <!-- Content will be generated by JS -->
+                </div>
                 <div id="home-list">
-                    </div>
+                    <!-- Occurrences will be injected here -->
+                </div>
                 <div id="home-empty-state" class="empty-state" style="display: none;">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5zM17 9l-5 5-5-5"></path></svg>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5zM17 9l-5 5-5-5"></path>
+                    </svg>
                     <div class="title">All Clear!</div>
                     <div class="message">You have no upcoming budget items for this period.</div>
                 </div>
             </section>
 
+            <!-- Overview View (was Analysis) -->
             <section id="overview-view">
-                <div classs="filter-tabs" id="overview-filter-tabs" style="margin-bottom: 1rem; display: flex; justify-content: center; gap: 0.5rem;">
+                <div classs="filter-tabs" id="overview-filter-tabs"
+                    style="margin-bottom: 1rem; display: flex; justify-content: center; gap: 0.5rem;">
                     <button class="filter-btn active" data-filter="this-month">This Month</button>
                     <button class="filter-btn" data-filter="next-month">Next Month</button>
                     <button class="filter-btn" data-filter="this-year">This Year</button>
                 </div>
                 <div id="overview-content">
-                    </div>
+                    <!-- Overview content will be injected here -->
+                </div>
                 <div id="overview-empty-state" class="empty-state" style="display: none;">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path></svg>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
+                    </svg>
                     <div class="title">No Data to Analyze</div>
                     <div class="message">Add some items to see your spending overview.</div>
                 </div>
             </section>
 
+            <!-- Items View -->
             <section id="items-view">
                 <div id="items-list">
-                    </div>
+                    <!-- Budget items will be injected here -->
+                </div>
                 <div id="items-empty-state" class="empty-state" style="display: none;">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                        </path>
+                    </svg>
                     <div class="title">No Items Yet</div>
                     <div class="message">Tap the '+' button to add your first budget item.</div>
                 </div>
             </section>
 
+            <!-- Categories View -->
             <section id="categories-view">
                 <div id="categories-list">
-                    </div>
+                    <!-- Categories will be injected here -->
+                </div>
                 <div id="categories-empty-state" class="empty-state" style="display: none;">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M5 11v2m14-2v2"></path></svg>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M5 11v2m14-2v2">
+                        </path>
+                    </svg>
                     <div class="title">No Categories</div>
                     <div class="message">Tap the '+' button to add categories and organize your budget.</div>
                 </div>
             </section>
         </main>
 
+        <!-- --- FAB & Menu --- -->
         <div class="fab-container" id="fab-container">
             <div class="fab-menu">
                 <div class="fab-menu-item" id="open-add-category-modal">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                    </svg>
                     Add Category
                 </div>
                 <div class="fab-menu-item" id="open-add-item-modal">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
                     Add Item
                 </div>
             </div>
             <button id="fab">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                <svg xmlns="http://www.w3.org/2G00/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
             </button>
         </div>
-        
+
+        <!-- --- Tab Bar (Footer) --- -->
         <footer>
             <button class="tab-btn active" data-view="home-view">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                    </path>
+                </svg>
                 Home
             </button>
             <button class="tab-btn" data-view="overview-view">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path></svg>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
+                </svg>
                 Overview
             </button>
             <button class="tab-btn" data-view="items-view">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                    </path>
+                </svg>
                 Items
             </button>
             <button class="tab-btn" data-view="categories-view">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                </svg>
                 Categories
             </button>
         </footer>
     </div>
 
+    <!-- --- Modals --- -->
+
+    <!-- Add Item Modal -->
     <div id="add-item-modal" class="modal-overlay">
         <div class="modal-content">
             <form id="add-item-form">
@@ -856,11 +1038,13 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="item-name">Item Name</label>
-                        <input type="text" id="item-name" class="form-control" required placeholder="e.g., Rent, Groceries">
+                        <input type="text" id="item-name" class="form-control" required
+                            placeholder="e.g., Rent, Groceries">
                     </div>
                     <div class="form-group">
                         <label for="item-value">Amount (₹)</label>
-                        <input type="number" id="item-value" class="form-control" step="0.01" min="0" required placeholder="e.g., 50000.00">
+                        <input type="number" id="item-value" class="form-control" step="0.01" min="0" required
+                            placeholder="e.g., 50000.00">
                     </div>
                     <div class="form-group">
                         <label for="item-start-date">Start Date</label>
@@ -881,13 +1065,15 @@
                         <label for="item-category">Category</label>
                         <select id="item-category" class="form-control" required>
                             <option value="">Select a category</option>
-                            </select>
+                            <!-- Options populated by JS -->
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="item-subcategory">Subcategory (Optional)</label>
                         <select id="item-subcategory" class="form-control">
                             <option value="">None</option>
-                            </select>
+                            <!-- Options populated by JS -->
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -898,6 +1084,7 @@
         </div>
     </div>
 
+    <!-- Add Category Modal -->
     <div id="add-category-modal" class="modal-overlay">
         <div class="modal-content">
             <form id="add-category-form">
@@ -916,11 +1103,13 @@
                     <div class="form-group" id="add-parent-category-group" style="display: none;">
                         <label for="add-parent-category">Parent Category</label>
                         <select id="add-parent-category" class="form-control">
-                            </select>
+                            <!-- Populated by JS -->
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="add-new-category-name">New Name</label>
-                        <input type="text" id="add-new-category-name" class="form-control" required placeholder="e.g., Housing or Rent">
+                        <input type="text" id="add-new-category-name" class="form-control" required
+                            placeholder="e.g., Housing or Rent">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -930,7 +1119,8 @@
             </form>
         </div>
     </div>
-    
+
+    <!-- Edit Category Modal (Rename) -->
     <div id="edit-category-modal" class="modal-overlay">
         <div class="modal-content">
             <form id="edit-category-form">
@@ -951,9 +1141,10 @@
             </form>
         </div>
     </div>
-    
+
+    <!-- Export Data Modal -->
     <div id="export-modal" class="modal-overlay">
-        <div class="modal-content modal-content-flex">
+        <div class="modal-content">
             <div class="modal-header">
                 <span>Export Data</span>
                 <button type="button" class="close-btn" data-modal-id="export-modal">&times;</button>
@@ -962,24 +1153,59 @@
                 <p style="font-size: 0.875rem; color: var(--secondary-text); margin-bottom: 1rem;">
                     Here is all your app data in JSON format. You can copy this or download it as a backup file.
                 </p>
-                <textarea id="export-data-textarea" readonly></textarea>
+                <textarea id="export-data-textarea" class="form-control" readonly></textarea>
             </div>
-            <div class="modal-footer export-footer">
+            <div class="modal-footer modal-footer-spaced">
                 <button type="button" class="btn btn-secondary" data-modal-id="export-modal">Close</button>
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" id="copy-export-btn">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                            </path>
+                        </svg>
                         Copy
                     </button>
                     <button type="button" class="btn btn-primary" id="download-export-btn">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
                         Download
                     </button>
                 </div>
             </div>
         </div>
     </div>
-    
+
+    <!-- Import Data Modal -->
+    <div id="import-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Import Data</span>
+                <button type="button" class="close-btn" data-modal-id="import-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.875rem; color: var(--secondary-text); margin-bottom: 1rem;">
+                    Paste your JSON backup data below. This will overwrite all current data.
+                </p>
+                <textarea id="import-data-textarea" class="form-control"
+                    placeholder='{ "categories": [...], "items": [...], "checkedOccurrences": [...] }'></textarea>
+                <div id="import-message"></div>
+            </div>
+            <div class="modal-footer modal-footer-spaced">
+                <button type="button" class="btn btn-secondary" id="import-try-sample-btn">Try Sample</button>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" data-modal-id="import-modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="import-submit-btn">
+                        Import Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
     <div id="confirmation-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -998,7 +1224,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            
+
             // --- STATE ---
             let categories = [];
             let items = [];
@@ -1006,6 +1232,7 @@
             let currentView = 'home-view';
             let currentHomeFilter = 'this-month';
             let currentOverviewFilter = 'this-month';
+            let currentTheme = 'light';
             let editingItemId = null;
             let editingCategory = { type: null, oldName: null, parent: null }; // {type: 'main'|'sub', oldName: '...', parent: '...'}
             let confirmationCallback = null;
@@ -1017,7 +1244,7 @@
             const fab = document.getElementById('fab');
             const fabContainer = document.getElementById('fab-container');
             const tabButtons = document.querySelectorAll('.tab-btn');
-            
+
             // Views
             const views = {
                 'home-view': document.getElementById('home-view'),
@@ -1025,7 +1252,7 @@
                 'items-view': document.getElementById('items-view'),
                 'categories-view': document.getElementById('categories-view'),
             };
-            
+
             // Home View
             const homeList = document.getElementById('home-list');
             const homeEmptyState = document.getElementById('home-empty-state');
@@ -1040,7 +1267,7 @@
             // Items View
             const itemsList = document.getElementById('items-list');
             const itemsEmptyState = document.getElementById('items-empty-state');
-            
+
             // Categories View
             const categoriesList = document.getElementById('categories-list');
             const categoriesEmptyState = document.getElementById('categories-empty-state');
@@ -1050,16 +1277,17 @@
             const addCategoryModal = document.getElementById('add-category-modal');
             const editCategoryModal = document.getElementById('edit-category-modal');
             const exportModal = document.getElementById('export-modal');
+            const importModal = document.getElementById('import-modal');
             const confirmationModal = document.getElementById('confirmation-modal');
             const modalOverlays = document.querySelectorAll('.modal-overlay');
             const addItemModalTitle = document.getElementById('add-item-modal-title');
             const addItemModalSaveBtn = document.getElementById('add-item-modal-save-btn');
-            
+
             // Modal Forms
             const addItemForm = document.getElementById('add-item-form');
             const addCategoryForm = document.getElementById('add-category-form');
             const editCategoryForm = document.getElementById('edit-category-form');
-            
+
             // Add Item Form Fields
             const itemNameInput = document.getElementById('item-name');
             const itemValueInput = document.getElementById('item-value');
@@ -1073,17 +1301,27 @@
             const addParentCategoryGroup = document.getElementById('add-parent-category-group');
             const addParentCategorySelect = document.getElementById('add-parent-category');
             const addNewCategoryNameInput = document.getElementById('add-new-category-name');
-            
+
             // Edit Category Form Fields
             const editCategoryTitle = document.getElementById('edit-category-title');
             const editCategoryNameInput = document.getElementById('edit-category-name');
-            
-            // Export Modal
+
+            // Header Buttons
+            const themeToggleBtn = document.getElementById('theme-toggle-btn');
+            const importBtn = document.getElementById('import-btn');
             const exportBtn = document.getElementById('export-btn');
+
+            // Export Modal
             const exportDataTextarea = document.getElementById('export-data-textarea');
             const copyExportBtn = document.getElementById('copy-export-btn');
             const downloadExportBtn = document.getElementById('download-export-btn');
-            
+
+            // Import Modal
+            const importDataTextarea = document.getElementById('import-data-textarea');
+            const importTrySampleBtn = document.getElementById('import-try-sample-btn');
+            const importSubmitBtn = document.getElementById('import-submit-btn');
+            const importMessage = document.getElementById('import-message');
+
             // Confirmation Modal
             const confirmationTitle = document.getElementById('confirmation-title');
             const confirmationMessage = document.getElementById('confirmation-message');
@@ -1093,9 +1331,10 @@
 
             // --- LOCAL STORAGE ---
             const STORAGE_KEYS = {
-                categories: 'budgetApp_categories_v2', // New key for new structure
-                items: 'budgetApp_items_v2', // New key for items with endDate
+                categories: 'budgetApp_categories_v2',
+                items: 'budgetApp_items_v2',
                 checked: 'budgetApp_checkedOccurrences',
+                theme: 'budgetApp_theme'
             };
 
             function loadData() {
@@ -1103,28 +1342,37 @@
                 items = JSON.parse(localStorage.getItem(STORAGE_KEYS.items)) || [];
                 const checkedArray = JSON.parse(localStorage.getItem(STORAGE_KEYS.checked)) || [];
                 checkedOccurrences = new Set(checkedArray);
-                
+
                 // Ensure Uncategorized always exists
                 if (!categories.some(c => c.name === UNCATEGORIZED)) {
                     categories.push({ name: UNCATEGORIZED, subcategories: [] });
                 }
+
+                // Load theme
+                const savedTheme = localStorage.getItem(STORAGE_KEYS.theme);
+                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                currentTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
             }
-            
+
             function saveData() {
                 localStorage.setItem(STORAGE_KEYS.categories, JSON.stringify(categories));
                 localStorage.setItem(STORAGE_KEYS.items, JSON.stringify(items));
                 localStorage.setItem(STORAGE_KEYS.checked, JSON.stringify(Array.from(checkedOccurrences)));
             }
 
+            function saveTheme() {
+                localStorage.setItem(STORAGE_KEYS.theme, currentTheme);
+            }
+
             // --- DATE & CURRENCY HELPERS ---
             function formatCurrency(amount) {
                 // Use en-IN for India and INR for Rupee
-                return new Intl.NumberFormat('en-IN', { 
-                    style: 'currency', 
-                    currency: 'INR' 
+                return new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR'
                 }).format(amount);
             }
-            
+
             function formatDate(date) {
                 return new Date(date).toLocaleDateString('en-US', {
                     month: 'short',
@@ -1132,33 +1380,44 @@
                     year: 'numeric',
                 });
             }
-            
+
             function getISODate(date) {
                 return date.toISOString().split('T')[0];
             }
-            
+
             function getLastDayOfThisMonth() {
                 const today = new Date();
                 const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
                 return getISODate(lastDay);
             }
 
+            function getTodayString() {
+                return getISODate(new Date());
+            }
+
+            // --- THEME ---
+            function setTheme(theme) {
+                currentTheme = theme;
+                document.body.dataset.theme = theme;
+                saveTheme();
+            }
+
             // --- NAVIGATION ---
             function showView(viewId) {
                 currentView = viewId;
-                
+
                 // Update views
                 for (const id in views) {
                     views[id].classList.remove('active');
                 }
                 views[viewId].classList.add('active');
-                
+
                 // Update tabs
                 tabButtons.forEach(btn => {
                     btn.classList.toggle('active', btn.dataset.view === viewId);
                 });
-                
-                // Update header title (optional, but good UX)
+
+                // Update header title
                 const viewTitles = {
                     'home-view': 'MrBudget',
                     'overview-view': 'Spending Overview',
@@ -1166,7 +1425,7 @@
                     'categories-view': 'Categories',
                 };
                 appHeaderTitle.textContent = viewTitles[viewId];
-                
+
                 // Render content for the new view
                 switch (viewId) {
                     case 'home-view':
@@ -1191,7 +1450,7 @@
 
             function closeModal(modalId) {
                 document.getElementById(modalId)?.classList.remove('active');
-                
+
                 if (modalId === 'add-item-modal') {
                     resetAddItemModal();
                 }
@@ -1202,6 +1461,11 @@
                 if (modalId === 'edit-category-modal') {
                     editCategoryForm.reset();
                     editingCategory = { type: null, oldName: null, parent: null };
+                }
+                if (modalId === 'import-modal') {
+                    importDataTextarea.value = '';
+                    importMessage.textContent = '';
+                    importMessage.style.display = 'none';
                 }
             }
 
@@ -1219,14 +1483,14 @@
                 homeList.innerHTML = '';
                 const { filterStartDate, filterEndDate } = getFilterDates(currentHomeFilter);
                 const occurrences = getOccurrences(filterStartDate, filterEndDate);
-                
+
                 // Sort by date
                 occurrences.sort((a, b) => a.occurrenceDate - b.occurrenceDate);
-                
+
                 let totalSpent = 0;
                 let totalRemaining = 0;
                 let totalAmountMonth = 0;
-                
+
                 if (occurrences.length === 0) {
                     homeEmptyState.style.display = 'block';
                 } else {
@@ -1235,9 +1499,9 @@
                         const occurrenceId = `${occ.id}_${getISODate(occ.occurrenceDate)}`;
                         const isChecked = checkedOccurrences.has(occurrenceId);
                         const isCheckable = currentHomeFilter === 'this-month';
-                        
+
                         totalAmountMonth += occ.value;
-                        
+
                         if (isChecked) {
                             totalSpent += occ.value;
                         } else {
@@ -1246,7 +1510,7 @@
 
                         const card = document.createElement('div');
                         card.className = `budget-card ${isChecked ? 'checked' : ''}`;
-                        
+
                         const checkboxHtml = isCheckable
                             ? `<input type="checkbox" class="occurrence-checkbox" data-occurrence-id="${occurrenceId}" ${isChecked ? 'checked' : ''}>`
                             : '';
@@ -1263,7 +1527,7 @@
                         homeList.appendChild(card);
                     });
                 }
-                
+
                 // Update Total Display
                 if (currentHomeFilter === 'this-month') {
                     totalDisplayContainer.innerHTML = `
@@ -1295,11 +1559,11 @@
                     `;
                 }
             }
-            
+
             // Render Overview
             function renderOverviewView() {
                 overviewContent.innerHTML = '';
-                
+
                 // 1. Get occurrences for the selected filter
                 const { filterStartDate, filterEndDate } = getOverviewDates(currentOverviewFilter);
                 const occurrences = getOccurrences(filterStartDate, filterEndDate);
@@ -1310,14 +1574,14 @@
                 occurrences.forEach(occ => {
                     const { category, subcategory, value } = occ;
                     const cat = category || UNCATEGORIZED; // Ensure fallback
-                    
+
                     overallTotalAmount += value;
-                    
+
                     if (!overviewData[cat]) {
                         overviewData[cat] = { total: 0, subcategories: {} };
                     }
                     overviewData[cat].total += value;
-                    
+
                     if (subcategory) {
                         if (!overviewData[cat].subcategories[subcategory]) {
                             overviewData[cat].subcategories[subcategory] = 0;
@@ -1358,7 +1622,7 @@
 
                         if (sortedSubcategories.length > 0 || categoryData.total > 0) {
                             subcategoryHtml = '<ul class="subcategory-analysis">';
-                            
+
                             sortedSubcategories.forEach(subName => {
                                 const subAmount = subcategories[subName];
                                 subcategorySum += subAmount;
@@ -1372,18 +1636,18 @@
 
                             const uncategorizedAmount = categoryData.total - subcategorySum;
                             // Use epsilon for float comparison, check if > 1 cent
-                            if (uncategorizedAmount > 0.005) { 
-                                 subcategoryHtml += `
+                            if (uncategorizedAmount > 0.005) {
+                                subcategoryHtml += `
                                     <li>
                                         <span>(Uncategorized)</span>
                                         <span>${formatCurrency(uncategorizedAmount)}</span>
                                     </li>
                                 `;
                             }
-                            
+
                             subcategoryHtml += '</ul>';
                         }
-                        
+
                         card.innerHTML = `
                             <div class="info">
                                 <div class="title" style="display: flex; justify-content: space-between; align-items: center;">
@@ -1397,7 +1661,7 @@
                     });
                 }
             }
-            
+
             // Render Items
             function renderItemsView() {
                 itemsList.innerHTML = '';
@@ -1407,17 +1671,17 @@
                     itemsEmptyState.style.display = 'none';
                     // Sort items by name
                     const sortedItems = [...items].sort((a, b) => a.name.localeCompare(b.name));
-                    
+
                     sortedItems.forEach(item => {
                         const card = document.createElement('div');
                         card.className = 'list-card';
                         const categoryDisplay = item.category || UNCATEGORIZED;
-                        
+
                         let endDateHtml = '';
                         if (item.endDate) {
                             endDateHtml = `<br><strong class="end-date">Ends On:</strong> ${formatDate(item.endDate)}`;
                         }
-                        
+
                         card.innerHTML = `
                             <div class="info">
                                 <div class="title">${item.name} (${formatCurrency(item.value)})</div>
@@ -1448,14 +1712,14 @@
                     categoriesEmptyState.style.display = 'block';
                 } else {
                     categoriesEmptyState.style.display = 'none';
-                    
+
                     // Sort to show Uncategorized last
                     const sortedCategories = categories.sort((a, b) => {
                         if (a.name === UNCATEGORIZED) return 1;
                         if (b.name === UNCATEGORIZED) return -1;
                         return a.name.localeCompare(b.name);
                     });
-                
+
                     sortedCategories.forEach(cat => {
                         const isUncategorized = cat.name === UNCATEGORIZED;
                         const card = document.createElement('div');
@@ -1482,7 +1746,7 @@
                             subcategoryHtml += `<span style="font-size: 0.875rem; color: var(--secondary-text); padding-left: 1.5rem;">No subcategories</span>`;
                         }
                         subcategoryHtml += '</div>';
-                        
+
                         card.innerHTML = `
                             <div class="category-header">
                                 <span class="title">${cat.name}</span>
@@ -1502,7 +1766,7 @@
                         categoriesList.appendChild(card);
                     });
                 }
-                
+
                 // After rendering, update dropdowns in forms
                 populateCategoryDropdowns();
             }
@@ -1512,9 +1776,9 @@
                 const today = new Date();
                 const currentYear = today.getFullYear();
                 const currentMonth = today.getMonth();
-                
+
                 let filterStartDate, filterEndDate;
-                
+
                 if (filter === 'this-month') {
                     filterStartDate = new Date(currentYear, currentMonth, 1);
                     filterEndDate = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59); // Last day of current month
@@ -1525,7 +1789,7 @@
                     filterStartDate = new Date(currentYear, 0, 1); // Jan 1st this year
                     filterEndDate = new Date(currentYear, currentMonth, 0, 23, 59, 59); // Last day of last month
                 }
-                
+
                 return { filterStartDate, filterEndDate };
             }
 
@@ -1533,7 +1797,7 @@
                 const today = new Date();
                 const currentYear = today.getFullYear();
                 const currentMonth = today.getMonth();
-                
+
                 if (filter === 'this-month') {
                     return getFilterDates('this-month');
                 } else if (filter === 'next-month') {
@@ -1547,28 +1811,28 @@
 
             function getOccurrences(filterStartDate, filterEndDate) {
                 const allOccurrences = [];
-                
+
                 items.forEach(item => {
                     const originalStartDate = new Date(item.startDate);
                     // Adjust start date to be in local timezone (date input is local)
                     originalStartDate.setMinutes(originalStartDate.getMinutes() + originalStartDate.getTimezoneOffset());
-                    
+
                     if (originalStartDate > filterEndDate) {
                         return; // Item doesn't even start by the end of the filter
                     }
-                    
+
                     // New check: if item has an end date, don't generate occurrences after it
                     let itemEndDate = null;
                     if (item.endDate) {
                         itemEndDate = new Date(item.endDate);
                         itemEndDate.setMinutes(itemEndDate.getMinutes() + itemEndDate.getTimezoneOffset());
-                        
+
                         // If the item ended before this filter period even starts, skip it
-                        if(itemEndDate < filterStartDate) {
+                        if (itemEndDate < filterStartDate) {
                             return;
                         }
                     }
-                    
+
                     let n = 0;
                     while (true) {
                         let occurrenceDate;
@@ -1605,26 +1869,26 @@
                                 }
                                 break;
                         }
-                        
+
                         // Stop if we've gone past the filter's end date
                         if (occurrenceDate > filterEndDate) {
                             break;
                         }
-                        
+
                         // New check: Stop if occurrenceDate is after the item's end date
                         if (itemEndDate && occurrenceDate > itemEndDate) {
                             break;
                         }
-                        
+
                         // Add if it's within the filter's start and end
                         if (occurrenceDate >= filterStartDate) {
                             allOccurrences.push({ ...item, occurrenceDate: occurrenceDate });
                         }
-                        
+
                         n++;
                     }
                 });
-                
+
                 return allOccurrences;
             }
 
@@ -1632,17 +1896,17 @@
             function populateCategoryDropdowns() {
                 const currentItemCategory = itemCategoryInput.value;
                 const currentParentCategory = addParentCategorySelect.value;
-                
+
                 itemCategoryInput.innerHTML = `<option value="">Select a category</option>`;
                 addParentCategorySelect.innerHTML = ``; // No "select" option needed here
-                
+
                 // Sort categories, showing Uncategorized last
                 const sortedCategories = categories.sort((a, b) => {
                     if (a.name === UNCATEGORIZED) return 1;
                     if (b.name === UNCATEGORIZED) return -1;
                     return a.name.localeCompare(b.name);
                 });
-                
+
                 sortedCategories.forEach(cat => {
                     const option = `<option value="${cat.name}">${cat.name}</option>`;
                     itemCategoryInput.innerHTML += option;
@@ -1650,17 +1914,17 @@
                         addParentCategorySelect.innerHTML += option;
                     }
                 });
-                
+
                 itemCategoryInput.value = currentItemCategory; // Restore selection if possible
                 addParentCategorySelect.value = currentParentCategory;
-                
+
                 updateSubcategoryDropdown(); // Update subcategories based on restored selection
             }
-            
+
             function updateSubcategoryDropdown() {
                 const selectedCategoryName = itemCategoryInput.value;
                 const selectedCategory = categories.find(cat => cat.name === selectedCategoryName);
-                
+
                 itemSubcategoryInput.innerHTML = '<option value="">None</option>';
                 if (selectedCategory && selectedCategory.subcategories.length > 0) {
                     itemSubcategoryInput.disabled = false;
@@ -1676,9 +1940,9 @@
                 e.preventDefault();
                 const type = addCategoryType.value;
                 const newName = addNewCategoryNameInput.value.trim();
-                
+
                 if (!newName) return;
-                
+
                 if (type === 'main') {
                     // Check if main category already exists
                     if (categories.some(c => c.name.toLowerCase() === newName.toLowerCase())) {
@@ -1690,12 +1954,12 @@
                     // Add subcategory
                     const parentName = addParentCategorySelect.value;
                     const parentCategory = categories.find(c => c.name === parentName);
-                    
+
                     if (!parentCategory) {
                         console.warn('Parent category not found');
                         return;
                     }
-                    
+
                     // Check if subcategory already exists
                     if (parentCategory.subcategories.some(s => s.toLowerCase() === newName.toLowerCase())) {
                         console.warn('Subcategory already exists');
@@ -1710,14 +1974,14 @@
                 addParentCategoryGroup.style.display = 'none';
                 closeModal('add-category-modal');
             }
-            
+
             function handleEditCategory(e) {
                 e.preventDefault();
                 const newName = editCategoryNameInput.value.trim();
                 if (!newName) return;
-                
+
                 const { type, oldName, parent } = editingCategory;
-                
+
                 if (type === 'main') {
                     // --- Rename Main Category ---
                     if (newName === UNCATEGORIZED || newName.toLowerCase() === oldName.toLowerCase()) {
@@ -1729,7 +1993,7 @@
                         console.warn('Category name already exists');
                         return;
                     }
-                    
+
                     const category = categories.find(c => c.name === oldName);
                     if (category) {
                         category.name = newName;
@@ -1747,13 +2011,13 @@
                         closeModal('edit-category-modal');
                         return;
                     }
-                    
+
                     // Check if new name exists
                     if (parentCategory.subcategories.some(s => s.toLowerCase() === newName.toLowerCase())) {
-                         console.warn('Subcategory name already exists');
-                         return;
+                        console.warn('Subcategory name already exists');
+                        return;
                     }
-                    
+
                     // Find and replace
                     const subIndex = parentCategory.subcategories.indexOf(oldName);
                     if (subIndex > -1) {
@@ -1766,17 +2030,17 @@
                         });
                     }
                 }
-                
+
                 saveData();
                 renderAllViews();
                 closeModal('edit-category-modal');
             }
-            
+
             function handleAddItem(e) {
                 e.preventDefault();
-                
+
                 let itemCategory = itemCategoryInput.value || UNCATEGORIZED;
-                
+
                 if (editingItemId) {
                     // --- Handle Update ---
                     const item = items.find(i => i.id === editingItemId);
@@ -1799,33 +2063,33 @@
                         subcategory: itemSubcategoryInput.value,
                         endDate: null // new field
                     };
-                    
+
                     if (!newItem.name || !newItem.value || !newItem.startDate) {
                         return; // Validation failed
                     }
                     items.push(newItem);
                 }
-                
+
                 saveData();
                 renderAllViews();
                 closeModal('add-item-modal'); // This will also reset the form
             }
-            
+
             function openEditModal(itemId) {
                 const item = items.find(i => i.id === itemId);
                 if (!item) return;
 
                 editingItemId = itemId;
-                
+
                 // Populate form
                 itemNameInput.value = item.name;
                 itemValueInput.value = item.value;
                 itemCategoryInput.value = item.category;
-                
+
                 // Need to update subcategories *after* setting category
                 updateSubcategoryDropdown();
                 itemSubcategoryInput.value = item.subcategory;
-                
+
                 // Set and disable date/frequency
                 itemStartDateInput.value = item.startDate;
                 itemFrequencyInput.value = item.frequency;
@@ -1835,25 +2099,25 @@
                 // Update modal UI
                 addItemModalTitle.textContent = "Edit Budget Item";
                 addItemModalSaveBtn.textContent = "Update Item";
-                
+
                 openModal('add-item-modal');
             }
-            
+
             function openEditCategoryModal(type, name, parent = null) {
                 if (type === 'main' && name === UNCATEGORIZED) return;
-                
+
                 editingCategory = { type, oldName: name, parent };
-                
+
                 editCategoryTitle.textContent = `Rename ${type === 'main' ? 'Category' : 'Subcategory'}`;
                 editCategoryNameInput.value = name;
-                
+
                 openModal('edit-category-modal');
             }
 
             function resetAddItemModal() {
                 editingItemId = null;
                 addItemForm.reset();
-                
+
                 // Re-enable fields
                 itemStartDateInput.disabled = false;
                 itemFrequencyInput.disabled = false;
@@ -1861,19 +2125,19 @@
                 // Reset modal UI
                 addItemModalTitle.textContent = "Add Budget Item";
                 addItemModalSaveBtn.textContent = "Save Item";
-                
+
                 addItemModalTitle.textContent = "Save Item";
-                
+
                 updateSubcategoryDropdown();
             }
 
             function handleDeleteCategory(type, name, parent = null) {
                 if (type === 'main') {
                     if (name === UNCATEGORIZED) return;
-                    
+
                     // Delete main category
                     categories = categories.filter(c => c.name !== name);
-                    
+
                     // Update items
                     items.forEach(item => {
                         if (item.category === name) {
@@ -1888,7 +2152,7 @@
                     if (parentCategory) {
                         parentCategory.subcategories = parentCategory.subcategories.filter(s => s !== name);
                     }
-                    
+
                     // Update items
                     items.forEach(item => {
                         if (item.category === parent && item.subcategory === name) {
@@ -1896,11 +2160,11 @@
                         }
                     });
                 }
-                
+
                 saveData();
                 renderAllViews();
             }
-            
+
             function handleDeleteItem(itemId) {
                 const item = items.find(i => i.id === itemId);
                 if (item) {
@@ -1918,8 +2182,27 @@
                 renderHomeView();
                 renderOverviewView();
             }
-            
-            // --- Export Logic ---
+
+            // --- Import / Export Logic ---
+            const SAMPLE_DATA = {
+                "categories": [
+                    { "name": "Uncategorized", "subcategories": [] },
+                    { "name": "Housing", "subcategories": ["Rent", "Utilities", "Maintenance"] },
+                    { "name": "Food", "subcategories": ["Groceries", "Dining Out"] },
+                    { "name": "Transportation", "subcategories": ["Gas", "Public Transit"] },
+                    { "name": "Subscriptions", "subcategories": ["Streaming", "Software"] }
+                ],
+                "items": [
+                    { "id": "item_1700000000001", "name": "Rent", "value": 50000, "startDate": "2024-01-01", "frequency": "monthly", "category": "Housing", "subcategory": "Rent", "endDate": null },
+                    { "id": "item_1700000000002", "name": "Electricity Bill", "value": 4000, "startDate": "2024-01-15", "frequency": "monthly", "category": "Housing", "subcategory": "Utilities", "endDate": null },
+                    { "id": "item_1700000000003", "name": "Weekly Groceries", "value": 7000, "startDate": "2024-01-05", "frequency": "weekly", "category": "Food", "subcategory": "Groceries", "endDate": null },
+                    { "id": "item_1700000000004", "name": "Netflix", "value": 649, "startDate": "2024-01-10", "frequency": "monthly", "category": "Subscriptions", "subcategory": "Streaming", "endDate": null },
+                    { "id": "item_1700000000005", "name": "Car Gas", "value": 3000, "startDate": "2024-01-08", "frequency": "bi-weekly", "category": "Transportation", "subcategory": "Gas", "endDate": null },
+                    { "id": "item_1700000000006", "name": "Dinner Out", "value": 2500, "startDate": getTodayString(), "frequency": "one-time", "category": "Food", "subcategory": "Dining Out", "endDate": null }
+                ],
+                "checkedOccurrences": []
+            };
+
             function getFullBackupData() {
                 return {
                     categories: categories,
@@ -1927,13 +2210,13 @@
                     checkedOccurrences: Array.from(checkedOccurrences)
                 };
             }
-            
+
             function openExportModal() {
                 const data = getFullBackupData();
                 exportDataTextarea.value = JSON.stringify(data, null, 2); // Pretty-print JSON
                 openModal('export-modal');
             }
-            
+
             function copyToClipboard() {
                 exportDataTextarea.select();
                 document.execCommand('copy');
@@ -1946,7 +2229,7 @@
                     `;
                 }, 1500);
             }
-            
+
             function downloadJson() {
                 const data = exportDataTextarea.value;
                 const blob = new Blob([data], { type: 'application/json' });
@@ -1960,25 +2243,107 @@
                 URL.revokeObjectURL(url);
             }
 
+            function showImportMessage(message, type = 'error') {
+                importMessage.textContent = message;
+                importMessage.className = type;
+                importMessage.style.display = 'block';
+            }
+
+            function validateImportData(data) {
+                if (typeof data !== 'object' || data === null) return "Invalid data: Not an object.";
+
+                // Validate categories
+                if (!Array.isArray(data.categories)) return "Invalid data: 'categories' must be an array.";
+                for (const cat of data.categories) {
+                    if (typeof cat.name !== 'string' || !Array.isArray(cat.subcategories)) {
+                        return "Invalid data: A category is malformed. Requires 'name' (string) and 'subcategories' (array).";
+                    }
+                    if (cat.subcategories.some(s => typeof s !== 'string')) {
+                        return "Invalid data: A subcategory is not a string.";
+                    }
+                }
+
+                // Validate items
+                if (!Array.isArray(data.items)) return "Invalid data: 'items' must be an array.";
+                for (const item of data.items) {
+                    if (typeof item.id !== 'string' ||
+                        typeof item.name !== 'string' ||
+                        typeof item.value !== 'number' ||
+                        typeof item.startDate !== 'string' || // Can be more specific with regex
+                        typeof item.frequency !== 'string' ||
+                        typeof item.category !== 'string') {
+                        return "Invalid data: An item is missing required fields or has wrong types.";
+                    }
+                }
+
+                // Validate checkedOccurrences
+                if (!Array.isArray(data.checkedOccurrences)) return "Invalid data: 'checkedOccurrences' must be an array.";
+                if (data.checkedOccurrences.some(s => typeof s !== 'string')) {
+                    return "Invalid data: 'checkedOccurrences' must be an array of strings.";
+                }
+
+                // Ensure Uncategorized exists
+                if (!data.categories.some(c => c.name === UNCATEGORIZED)) {
+                    data.categories.push({ name: UNCATEGORIZED, subcategories: [] });
+                }
+
+                return null; // All good
+            }
+
+            function handleImportData() {
+                let data;
+                try {
+                    data = JSON.parse(importDataTextarea.value);
+                } catch (e) {
+                    showImportMessage('Invalid JSON format. Please check your data.');
+                    return;
+                }
+
+                const validationError = validateImportData(data);
+                if (validationError) {
+                    showImportMessage(validationError);
+                    return;
+                }
+
+                // If valid, show confirmation
+                closeModal('import-modal');
+                openConfirmationModal(
+                    'Overwrite All Data?',
+                    'Importing this file will overwrite all your current items and categories. This cannot be undone.',
+                    () => {
+                        // User confirmed. Proceed with import.
+                        categories = data.categories;
+                        items = data.items;
+                        checkedOccurrences = new Set(data.checkedOccurrences);
+
+                        saveData();
+                        renderAllViews();
+
+                        // Show a temporary success message (maybe in a toast, but for now, just log)
+                        console.log('Data imported successfully!');
+                    }
+                );
+            }
+
             // --- EVENT LISTENERS ---
             function setupEventListeners() {
                 // Tab Navigation
                 tabButtons.forEach(btn => {
                     btn.addEventListener('click', () => showView(btn.dataset.view));
                 });
-                
+
                 // FAB
                 fab.addEventListener('click', () => {
                     fabContainer.classList.toggle('open');
                 });
-                
+
                 // Close FAB menu if clicking outside
                 document.addEventListener('click', (e) => {
                     if (!fabContainer.contains(e.target) && fabContainer.classList.contains('open')) {
                         fabContainer.classList.remove('open');
                     }
                 });
-                
+
                 // FAB Menu Buttons
                 document.getElementById('open-add-category-modal').addEventListener('click', () => {
                     fabContainer.classList.remove('open');
@@ -1986,17 +2351,22 @@
                     populateCategoryDropdowns();
                     openModal('add-category-modal');
                 });
-                
+
                 document.getElementById('open-add-item-modal').addEventListener('click', () => {
                     fabContainer.classList.remove('open');
                     // Set default date
                     if (!itemStartDateInput.value) {
-                        itemStartDateInput.value = getISODate(new Date());
+                        itemStartDateInput.value = getTodayString();
                     }
                     openModal('add-item-modal');
                 });
-                
-                // Header Export Button
+
+                // Header Buttons
+                themeToggleBtn.addEventListener('click', () => {
+                    setTheme(currentTheme === 'light' ? 'dark' : 'light');
+                });
+
+                importBtn.addEventListener('click', () => openModal('import-modal'));
                 exportBtn.addEventListener('click', openExportModal);
 
                 // Modal Close Buttons
@@ -2008,17 +2378,24 @@
                         }
                     });
                 });
-                
+
                 // Export Modal Buttons
                 copyExportBtn.addEventListener('click', copyToClipboard);
                 downloadExportBtn.addEventListener('click', downloadJson);
-                
+
+                // Import Modal Buttons
+                importTrySampleBtn.addEventListener('click', () => {
+                    importDataTextarea.value = JSON.stringify(SAMPLE_DATA, null, 2);
+                    importMessage.style.display = 'none';
+                });
+                importSubmitBtn.addEventListener('click', handleImportData);
+
                 // Confirmation Modal
                 confirmationCancelBtn.addEventListener('click', () => {
                     closeModal('confirmation-modal');
                     confirmationCallback = null;
                 });
-                
+
                 confirmationConfirmBtn.addEventListener('click', () => {
                     if (typeof confirmationCallback === 'function') {
                         confirmationCallback();
@@ -2026,15 +2403,15 @@
                     closeModal('confirmation-modal');
                     confirmationCallback = null;
                 });
-                
+
                 // Form Submissions
                 addCategoryForm.addEventListener('submit', handleAddCategory);
                 editCategoryForm.addEventListener('submit', handleEditCategory);
                 addItemForm.addEventListener('submit', handleAddItem);
-                
+
                 // Dynamic Subcategories
                 itemCategoryInput.addEventListener('change', updateSubcategoryDropdown);
-                
+
                 // Add Category Type Toggle
                 addCategoryType.addEventListener('change', (e) => {
                     if (e.target.value === 'sub') {
@@ -2053,7 +2430,7 @@
                         renderHomeView();
                     });
                 });
-                
+
                 // Overview Filter Buttons
                 overviewFilterButtons.forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -2063,17 +2440,17 @@
                         renderOverviewView();
                     });
                 });
-                
+
                 // --- EVENT DELEGATION for dynamic content ---
-                
+
                 // Home list checkbox toggle
                 homeList.addEventListener('click', (e) => {
                     const checkbox = e.target.closest('.occurrence-checkbox');
                     if (!checkbox) return;
-                    
+
                     const occurrenceId = checkbox.dataset.occurrenceId;
                     const card = checkbox.closest('.budget-card');
-                    
+
                     if (checkbox.checked) {
                         checkedOccurrences.add(occurrenceId);
                         card.classList.add('checked');
@@ -2081,7 +2458,7 @@
                         checkedOccurrences.delete(occurrenceId);
                         card.classList.remove('checked');
                     }
-                    
+
                     saveData();
                     // Re-render home to update total
                     renderHomeView();
@@ -2090,22 +2467,22 @@
                         renderOverviewView();
                     }
                 });
-                
+
                 // Item list buttons (edit and delete)
                 itemsList.addEventListener('click', (e) => {
                     const button = e.target.closest('.edit-btn, .delete-item-btn');
                     if (!button) return;
-                    
+
                     const itemId = button.dataset.itemId;
-                    
+
                     if (button.classList.contains('edit-btn')) {
                         openEditModal(itemId);
                     } else if (button.classList.contains('delete-item-btn')) {
                         const item = items.find(i => i.id === itemId);
                         const itemName = item ? item.name : 'this item';
-                        
+
                         openConfirmationModal(
-                            `Delete "${itemName}"?`, 
+                            `Delete "${itemName}"?`,
                             "This will stop the item from appearing in future months. It will still be visible in 'Previous' and 'This Month'.",
                             () => handleDeleteItem(itemId)
                         );
@@ -2130,7 +2507,7 @@
                             title = `Delete "${name}"?`;
                             message = `All items using this subcategory will be updated to have no subcategory.`;
                         }
-                        
+
                         openConfirmationModal(title, message, () => handleDeleteCategory(type, name, parent));
                     }
                 });
@@ -2139,13 +2516,15 @@
             // --- INITIALIZE APP ---
             function init() {
                 loadData();
+                setTheme(currentTheme); // Apply loaded theme
                 setupEventListeners();
                 showView(currentView); // Render initial view
             }
-            
+
             init();
 
         });
     </script>
 </body>
+
 </html>
