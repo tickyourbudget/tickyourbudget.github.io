@@ -8,6 +8,7 @@ import {
   setupProfileManager,
   setProfileChangeCallback,
   ensureDefaultProfile,
+  renderProfiles,
 } from './components/profile.js';
 import { initHomeView, renderHome } from './views/home.js';
 import { initItemsView, renderItems } from './views/items.js';
@@ -23,6 +24,7 @@ const viewRenderers = {
   viewItems: renderItems,
   viewCategories: renderCategories,
   viewData: renderData,
+  viewProfiles: renderProfiles,
 };
 
 // Navigation
@@ -114,6 +116,15 @@ async function init() {
         console.warn('SW registration failed:', err);
       });
     }
+
+    // Fix mobile keyboard overlap: scroll focused inputs into view
+    document.addEventListener('focusin', (e) => {
+      if (e.target.matches('input, select, textarea')) {
+        setTimeout(() => {
+          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 350);
+      }
+    });
 
     console.log('tickyourbudget initialized');
   } catch (err) {

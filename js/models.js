@@ -82,22 +82,35 @@ function createTransaction({ budgetItemId, profileId, date, amount, name }) {
 // Formatting helpers
 
 function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-  }).format(amount);
+  // Read currency from localStorage (avoids circular import with profile.js)
+  const currencyCode = localStorage.getItem('tyb_currency') || 'INR';
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: currencyCode,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch (e) {
+    // Fallback if currency code is invalid
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  }
 }
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 function getMonthLabel(year, month) {
   const d = new Date(year, month, 1);
-  return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
 }
 
 export {

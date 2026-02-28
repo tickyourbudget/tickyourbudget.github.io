@@ -41,6 +41,16 @@ function openModal(title, contentHTML, options = {}) {
 
   modalContainer.appendChild(overlay);
 
+  // Fix mobile keyboard overlap: scroll focused inputs into view
+  const modalEl = overlay.querySelector('.modal');
+  modalEl.addEventListener('focusin', (e) => {
+    if (e.target.matches('input, select, textarea')) {
+      setTimeout(() => {
+        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  });
+
   return { overlay, close };
 }
 

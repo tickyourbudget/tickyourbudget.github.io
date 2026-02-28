@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="description"
         content="tickyourbudget — A lightweight, offline-first monthly budget checklist PWA. Track recurring expenses, manage categories, and check off payments.">
     <meta name="keywords" content="budget, checklist, PWA, expense tracker, monthly budget, offline">
@@ -38,15 +39,6 @@
                 <select id="profileSelect" aria-label="Select Profile">
                     <option value="">No profiles</option>
                 </select>
-                <button class="btn-profile-manage" id="btnManageProfiles" aria-label="Manage Profiles"
-                    title="Manage Profiles">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="3" />
-                        <path
-                            d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
-                    </svg>
-                </button>
             </div>
             <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
                 <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
@@ -223,6 +215,11 @@
             </div>
         </section>
 
+        <!-- Profiles View -->
+        <section class="view" id="viewProfiles" aria-label="Profiles">
+            <div class="profiles-view" id="profilesViewContainer"></div>
+        </section>
+
     </main>
 
     <!-- ===== Bottom Navigation ===== -->
@@ -259,6 +256,14 @@
                 <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
             </svg>
             <span>Data</span>
+        </button>
+        <button class="nav-item" data-view="viewProfiles" aria-label="Profiles">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+            </svg>
+            <span>Profiles</span>
         </button>
     </nav>
 

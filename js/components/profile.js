@@ -6,7 +6,68 @@ import { openModal, showConfirm } from './modal.js';
 import { showToast } from './toast.js';
 
 const ACTIVE_PROFILE_KEY = 'tyb_active_profile';
+const CURRENCY_KEY = 'tyb_currency';
 let onProfileChange = null;
+
+// Common currency options
+const CURRENCY_OPTIONS = [
+  { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+  { code: 'USD', symbol: '$', name: 'US Dollar' },
+  { code: 'EUR', symbol: '€', name: 'Euro' },
+  { code: 'GBP', symbol: '£', name: 'British Pound' },
+  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+  { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
+  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+  { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar' },
+  { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham' },
+  { code: 'SAR', symbol: '﷼', name: 'Saudi Riyal' },
+  { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
+  { code: 'KRW', symbol: '₩', name: 'South Korean Won' },
+  { code: 'THB', symbol: '฿', name: 'Thai Baht' },
+  { code: 'MYR', symbol: 'RM', name: 'Malaysian Ringgit' },
+  { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah' },
+  { code: 'PHP', symbol: '₱', name: 'Philippine Peso' },
+  { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
+  { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
+  { code: 'SEK', symbol: 'kr', name: 'Swedish Krona' },
+];
+
+function detectDefaultCurrency() {
+  try {
+    const locale = navigator.language || navigator.userLanguage || 'en-IN';
+    const regionMatch = locale.match(/[-_]([A-Z]{2})$/i);
+    if (regionMatch) {
+      const region = regionMatch[1].toUpperCase();
+      const regionToCurrency = {
+        IN: 'INR', US: 'USD', GB: 'GBP', EU: 'EUR', DE: 'EUR', FR: 'EUR',
+        IT: 'EUR', ES: 'EUR', NL: 'EUR', JP: 'JPY', CN: 'CNY', AU: 'AUD',
+        CA: 'CAD', SG: 'SGD', AE: 'AED', SA: 'SAR', BR: 'BRL', KR: 'KRW',
+        TH: 'THB', MY: 'MYR', ID: 'IDR', PH: 'PHP', ZA: 'ZAR', CH: 'CHF',
+        SE: 'SEK',
+      };
+      if (regionToCurrency[region]) return regionToCurrency[region];
+    }
+  } catch (e) { /* fallback */ }
+  return 'INR';
+}
+
+function getCurrency() {
+  const stored = localStorage.getItem(CURRENCY_KEY);
+  if (stored) return stored;
+  const detected = detectDefaultCurrency();
+  localStorage.setItem(CURRENCY_KEY, detected);
+  return detected;
+}
+
+function setCurrency(code) {
+  localStorage.setItem(CURRENCY_KEY, code);
+}
+
+function getCurrencyInfo() {
+  const code = getCurrency();
+  return CURRENCY_OPTIONS.find(c => c.code === code) || CURRENCY_OPTIONS[0];
+}
 
 function setProfileChangeCallback(cb) {
   onProfileChange = cb;
@@ -56,11 +117,24 @@ function setupProfileSelector() {
 }
 
 function setupProfileManager() {
-  document.getElementById('btnManageProfiles').addEventListener('click', openProfileManager);
+  // No longer using a header button — profiles are a full view now
 }
 
 async function openProfileManager() {
+  // Kept for backward compat — now renders inline in view
+  renderProfiles();
+}
+
+async function renderProfiles() {
+  const container = document.getElementById('profilesViewContainer');
+  if (!container) return;
+
   const profiles = await dbGetAll(STORES.PROFILES);
+  const currentCurrency = getCurrency();
+
+  const currencyOptionsHTML = CURRENCY_OPTIONS.map(
+    c => `<option value="${c.code}" ${c.code === currentCurrency ? 'selected' : ''}>${c.symbol} — ${c.name} (${c.code})</option>`
+  ).join('');
 
   const listHTML = profiles
     .map(
@@ -84,23 +158,37 @@ async function openProfileManager() {
     )
     .join('');
 
-  const contentHTML = `
-    <ul class="profile-list">${listHTML || '<li class="empty-state__desc" style="padding:16px;text-align:center;">No profiles yet</li>'}</ul>
-    <div class="form-group">
-      <label for="newProfileName">New Profile Name</label>
-      <div style="display:flex;gap:8px;">
-        <input type="text" id="newProfileName" placeholder="e.g. Personal, Family" maxlength="50">
-        <button class="btn btn--primary btn--sm" id="btnAddProfile" style="white-space:nowrap;width:auto;padding:8px 16px;">Add</button>
+  container.innerHTML = `
+    <div class="data-section">
+      <div class="data-section__title">Currency</div>
+      <div class="form-group">
+        <label for="currencySelect">Display Currency</label>
+        <select id="currencySelect">${currencyOptionsHTML}</select>
+      </div>
+    </div>
+    <div class="data-section">
+      <div class="data-section__title">Profiles</div>
+      <ul class="profile-list">${listHTML || '<li class="empty-state__desc" style="padding:16px;text-align:center;">No profiles yet</li>'}</ul>
+      <div class="form-group">
+        <label for="newProfileName">New Profile Name</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="newProfileName" placeholder="e.g. Personal, Family" maxlength="50">
+          <button class="btn btn--primary btn--sm" id="btnAddProfile" style="white-space:nowrap;width:auto;padding:8px 16px;">Add</button>
+        </div>
       </div>
     </div>
   `;
 
-  const modal = openModal('Manage Profiles', contentHTML);
-  const overlay = modal.overlay;
+  // Currency change handler
+  container.querySelector('#currencySelect').addEventListener('change', (e) => {
+    setCurrency(e.target.value);
+    if (onProfileChange) onProfileChange();
+    showToast(`Currency set to ${e.target.value}`, 'success');
+  });
 
   // Add profile
-  overlay.querySelector('#btnAddProfile').addEventListener('click', async () => {
-    const input = overlay.querySelector('#newProfileName');
+  container.querySelector('#btnAddProfile').addEventListener('click', async () => {
+    const input = container.querySelector('#newProfileName');
     const name = input.value.trim();
     if (!name) {
       showToast('Please enter a profile name', 'error');
@@ -109,19 +197,19 @@ async function openProfileManager() {
     const profile = createProfile(name);
     await dbAdd(STORES.PROFILES, profile);
     setActiveProfileId(profile.id);
-    modal.close();
     await loadProfileSelector();
     if (onProfileChange) onProfileChange();
     showToast(`Profile "${name}" created`, 'success');
+    renderProfiles();
   });
 
   // Enter key for input
-  overlay.querySelector('#newProfileName').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') overlay.querySelector('#btnAddProfile').click();
+  container.querySelector('#newProfileName').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') container.querySelector('#btnAddProfile').click();
   });
 
   // Rename & Delete handlers
-  overlay.querySelectorAll('.profile-list__item').forEach((li) => {
+  container.querySelectorAll('.profile-list__item').forEach((li) => {
     const id = li.dataset.id;
 
     li.querySelector('[data-action="rename"]').addEventListener('click', async () => {
@@ -183,10 +271,10 @@ async function openProfileManager() {
         localStorage.removeItem(ACTIVE_PROFILE_KEY);
       }
 
-      modal.close();
       await loadProfileSelector();
       if (onProfileChange) onProfileChange();
       showToast('Profile deleted', 'success');
+      renderProfiles();
     });
   });
 }
@@ -215,4 +303,8 @@ export {
   setActiveProfileId,
   setProfileChangeCallback,
   ensureDefaultProfile,
+  renderProfiles,
+  getCurrency,
+  getCurrencyInfo,
+  CURRENCY_OPTIONS,
 };
