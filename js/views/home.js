@@ -4,9 +4,10 @@ import { getTransactionsForMonth, getProfileCategories, getProfileBudgetItems } 
 import { generateTransactionsForMonth, toggleTransactionStatus } from '../transaction-engine.js';
 import { formatCurrency, formatDate, getMonthLabel, TX_STATUS } from '../models.js';
 import { getActiveProfileId } from '../components/profile.js';
+import { openModal } from '../components/modal.js';
 
 let currentYear, currentMonth;
-let chartVisible = false;
+let lastCategoryTotals = null, lastTotal = 0;
 
 const CHART_COLORS = [
   '#a78bfa', '#f472b6', '#60a5fa', '#34d399', '#fbbf24',
@@ -44,17 +45,9 @@ function initHomeView() {
     renderHome();
   });
 
-  // Chart toggle
-  document.getElementById('btnToggleChart').addEventListener('click', () => {
-    chartVisible = !chartVisible;
-    const container = document.getElementById('chartContainer');
-    const btn = document.getElementById('btnToggleChart');
-    container.classList.toggle('hidden', !chartVisible);
-    btn.innerHTML = chartVisible
-      ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg> Hide Chart`
-      : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg> ${chartVisible ? 'Hide' : 'Show'} Chart`;
-    // Fix: just set the right text
-    btn.lastChild.textContent = chartVisible ? ' Hide Chart' : ' Show Chart';
+  // Chart modal
+  document.getElementById('btnShowChart').addEventListener('click', () => {
+    showChartModal();
   });
 
   // Search filter
@@ -89,7 +82,7 @@ async function renderHome() {
   const progressFill = document.getElementById('progressFill');
   const progressLabel = document.getElementById('progressLabel');
   const progressWrapper = document.getElementById('progressWrapper');
-  const chartSection = document.getElementById('chartSection');
+  const chartBtn = document.getElementById('btnShowChart');
   const comparisonEl = document.getElementById('monthComparison');
 
   monthLabel.textContent = getMonthLabel(currentYear, currentMonth);
@@ -107,7 +100,7 @@ async function renderHome() {
     progressFill.style.width = '0%';
     progressLabel.textContent = '0% paid';
     progressWrapper.style.display = 'none';
-    chartSection.classList.add('hidden');
+    chartBtn.classList.add('hidden');
     comparisonEl.classList.add('hidden');
     return;
   }
@@ -154,19 +147,21 @@ async function renderHome() {
   progressLabel.textContent = pct + '% paid';
   progressWrapper.style.display = '';
 
+  // Store chart data for modal
+  lastCategoryTotals = categoryTotals;
+  lastTotal = total;
+
   if (transactions.length === 0) {
     container.innerHTML = '';
     emptyState.classList.remove('hidden');
-    chartSection.classList.add('hidden');
+    chartBtn.classList.add('hidden');
     comparisonEl.classList.add('hidden');
+    progressWrapper.style.display = 'none';
     return;
   }
 
   emptyState.classList.add('hidden');
-  chartSection.classList.remove('hidden');
-
-  // Render donut chart
-  renderDonutChart(categoryTotals, total);
+  chartBtn.classList.remove('hidden');
 
   // Month-over-month comparison
   renderMonthComparison(profileId, total, comparisonEl);
@@ -244,25 +239,23 @@ async function renderHome() {
   });
 }
 
-function renderDonutChart(categoryTotals, total) {
-  const svg = document.getElementById('donutChart');
-  const legend = document.getElementById('chartLegend');
-  if (!svg || !legend) return;
+function showChartModal() {
+  if (!lastCategoryTotals || lastTotal === 0) return;
 
-  const entries = [...categoryTotals.entries()].sort((a, b) => b[1].total - a[1].total);
+  const entries = [...lastCategoryTotals.entries()].sort((a, b) => b[1].total - a[1].total);
   const cx = 100, cy = 100, r = 70;
   const circumference = 2 * Math.PI * r;
 
-  let pathsHTML = '';
+  let svgHTML = '';
   let legendHTML = '';
   let cumulativeOffset = 0;
 
   entries.forEach(([catId, data], i) => {
-    const pct = total > 0 ? data.total / total : 0;
+    const pct = data.total / lastTotal;
     const dashLength = pct * circumference;
     const color = CHART_COLORS[i % CHART_COLORS.length];
 
-    pathsHTML += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+    svgHTML += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
       stroke="${color}" stroke-width="28"
       stroke-dasharray="${dashLength} ${circumference - dashLength}"
       stroke-dashoffset="${-cumulativeOffset}"
@@ -270,18 +263,21 @@ function renderDonutChart(categoryTotals, total) {
 
     legendHTML += `<div class="chart-legend__item">
       <span class="chart-legend__dot" style="background:${color}"></span>
-      ${escapeHTML(data.name)} (${Math.round(pct * 100)}%)
+      ${escapeHTML(data.name)} — ${formatCurrency(data.total)} (${Math.round(pct * 100)}%)
     </div>`;
 
     cumulativeOffset += dashLength;
   });
 
-  // Center text
-  pathsHTML += `<text x="${cx}" y="${cy - 6}" text-anchor="middle" fill="var(--text-primary)" font-size="14" font-weight="700">${formatCurrency(total)}</text>`;
-  pathsHTML += `<text x="${cx}" y="${cy + 12}" text-anchor="middle" fill="var(--text-muted)" font-size="10">Total</text>`;
+  svgHTML += `<text x="${cx}" y="${cy - 6}" text-anchor="middle" fill="var(--text-primary)" font-size="14" font-weight="700">${formatCurrency(lastTotal)}</text>`;
+  svgHTML += `<text x="${cx}" y="${cy + 12}" text-anchor="middle" fill="var(--text-muted)" font-size="10">Total</text>`;
 
-  svg.innerHTML = pathsHTML;
-  legend.innerHTML = legendHTML;
+  const html = `<div class="modal-chart">
+    <svg class="donut-chart" viewBox="0 0 200 200">${svgHTML}</svg>
+    <div class="chart-legend">${legendHTML}</div>
+  </div>`;
+
+  openModal('Category Breakdown', html);
 }
 
 async function renderMonthComparison(profileId, currentTotal, el) {

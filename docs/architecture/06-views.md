@@ -4,6 +4,14 @@
 
 **Purpose:** Primary checklist interface. Displays transactions for a selected month with progress tracking and spending insights.
 
+The Home view layout (top to bottom):
+1. Month navigation bar
+2. Search filter (at the top for easy access)
+3. Summary bar (Total / Paid / Pending + chart icon button)
+4. Progress bar (hidden when no transactions)
+5. Month-over-month comparison
+6. Transaction checklist (or empty state)
+
 ### Month Navigation Bar
 
 ```
@@ -21,15 +29,16 @@ Navigation is **unbounded** — users can scroll to any past or future month.
 
 ### Summary Bar
 
-3-column grid showing:
+4-column grid (`1fr 1fr 1fr auto`) showing:
 
-| Card        | Calculation                                               | Color           |
-|-------------|-----------------------------------------------------------|-----------------|
-| **Total**   | Sum of `snapshotAmount` for all transactions in the month | Purple (accent) |
-| **Paid**    | Sum where `status === "Paid"`                             | Green           |
-| **Pending** | Sum where `status === "Pending"`                          | Amber/Orange    |
+| Card/Button       | Calculation / Purpose                                    | Color           |
+|-------------------|----------------------------------------------------------|-----------------|
+| **Total**         | Sum of `snapshotAmount` for all transactions in the month | Purple (accent) |
+| **Paid**          | Sum where `status === "Paid"`                             | Green           |
+| **Pending**       | Sum where `status === "Pending"`                          | Amber/Orange    |
+| **Chart button**  | Opens the category breakdown modal (pie-chart icon)       | Accent          |
 
-Updates in real-time when a transaction is toggled.
+The chart button is hidden when no transactions exist. Updates in real-time when a transaction is toggled.
 
 ### Progress Bar
 
@@ -38,7 +47,7 @@ Displayed below the summary bar. Shows the percentage of total amount that has b
 - Formula: `Math.round((paidAmount / totalAmount) * 100)`
 - Visual: Horizontal bar with filled portion + label (e.g., "67% paid")
 - Updates instantly when transactions are toggled
-- Hidden when no profile is selected
+- Hidden when no profile is selected or no transactions exist
 
 ### Month-over-Month Comparison
 
@@ -49,21 +58,23 @@ Shows the difference between the current month's total and the previous month's 
 - Arrow classes: `--up` (increase), `--down` (decrease), `--same` (no change)
 - Hidden when both months have zero totals
 
-### Donut Chart (Category Breakdown)
+### Donut Chart Modal (Category Breakdown)
 
-Shows spending distribution by category as an SVG donut chart:
+Shows spending distribution by category as an SVG donut chart inside a modal:
 
-- **Toggle button:** "Show Chart" / "Hide Chart" — collapsed by default
+- **Trigger:** Pie-chart icon button in the summary bar → calls `showChartModal()`
+- **Modal:** Opened via the shared `openModal('Category Breakdown', html)` component
 - **Chart:** SVG circles with `stroke-dasharray`/`stroke-dashoffset` for each category slice
 - **Center text:** Total amount and "Total" label
-- **Legend:** Colored dots with category name and percentage
+- **Legend:** Colored dots with category name, amount, and percentage
 - **Colors:** 12-color palette cycling via `CHART_COLORS` array
 - Categories sorted by total descending
-- Hidden when no transactions exist
+- Module-scope `lastCategoryTotals` / `lastTotal` cache the data so the modal can open without re-querying
+- Chart button hidden when no transactions exist
 
 ### Search Filter
 
-Text input with search icon. Filters the checklist in real-time:
+Text input with search icon, positioned at the top of the view (right after month nav). Filters the checklist in real-time:
 
 - Matches against transaction name (`snapshotName`) and amount
 - Hides non-matching checklist items via `display: none`

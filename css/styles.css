@@ -393,9 +393,35 @@ textarea {
 /* ===== Summary Bar ===== */
 .summary-bar {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr auto;
     gap: 10px;
     margin-bottom: 16px;
+    align-items: stretch;
+}
+
+.summary-chart-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    color: var(--accent);
+    transition: background var(--transition), color var(--transition);
+    cursor: pointer;
+    border: none;
+    padding: 0;
+}
+
+.summary-chart-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.summary-chart-btn:hover {
+    background: var(--accent);
+    color: var(--text-on-accent);
 }
 
 .summary-card {
@@ -1254,36 +1280,26 @@ textarea {
 }
 
 /* ===== Donut Chart ===== */
-.chart-section {
-    margin-bottom: 16px;
-}
-
-.chart-toggle {
-    width: 100%;
-    justify-content: center;
-}
-
-.chart-container {
-    margin-top: 12px;
+/* ===== Modal Chart ===== */
+.modal-chart {
     text-align: center;
 }
 
-.donut-chart {
-    width: 180px;
-    height: 180px;
-    margin: 0 auto;
+.modal-chart .donut-chart {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 16px;
     display: block;
 }
 
-.chart-legend {
+.modal-chart .chart-legend {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 8px 16px;
-    margin-top: 12px;
 }
 
-.chart-legend__item {
+.modal-chart .chart-legend__item {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -1291,7 +1307,7 @@ textarea {
     color: var(--text-secondary);
 }
 
-.chart-legend__dot {
+.modal-chart .chart-legend__dot {
     width: 10px;
     height: 10px;
     border-radius: var(--radius-full);
