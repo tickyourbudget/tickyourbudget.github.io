@@ -1,4 +1,4 @@
-// js/views/data.js — Data View (Export, Import, Sample, Clear)
+// js/views/data.js — Config View (Export, Import, Sample, Clear, Currency)
 
 import {
   exportProfileData,
@@ -15,6 +15,9 @@ import {
   getActiveProfileId,
   loadProfileSelector,
   setActiveProfileId,
+  getCurrency,
+  setCurrency,
+  CURRENCY_OPTIONS,
 } from '../components/profile.js';
 import { openModal, showConfirm } from '../components/modal.js';
 import { showToast } from '../components/toast.js';
@@ -26,7 +29,7 @@ function setDataChangeCallback(cb) {
   onDataChange = cb;
 }
 
-function initDataView() {
+function initConfigView() {
   document.getElementById('btnCopyJson').addEventListener('click', handleCopyJson);
   document.getElementById('btnDownloadJson').addEventListener('click', handleDownloadJson);
   document.getElementById('btnDownloadCsv').addEventListener('click', handleDownloadCsv);
@@ -37,11 +40,36 @@ function initDataView() {
   document.getElementById('btnImportPaste').addEventListener('click', handleImportPaste);
   document.getElementById('btnLoadSample').addEventListener('click', handleLoadSample);
   document.getElementById('btnClearData').addEventListener('click', handleClearData);
+
+  // Currency selector
+  initCurrencySelector();
 }
 
-async function renderData() {
+function initCurrencySelector() {
+  const select = document.getElementById('currencySelect');
+  const currentCurrency = getCurrency();
+
+  select.innerHTML = CURRENCY_OPTIONS.map(
+    c => `<option value="${c.code}" ${c.code === currentCurrency ? 'selected' : ''}>${c.symbol} — ${c.name} (${c.code})</option>`
+  ).join('');
+
+  select.addEventListener('change', (e) => {
+    setCurrency(e.target.value);
+    // Re-render the JSON preview with new currency
+    renderConfig();
+    showToast(`Currency set to ${e.target.value}`, 'success');
+  });
+}
+
+async function renderConfig() {
   const preview = document.getElementById('jsonPreview');
   const profileId = getActiveProfileId();
+
+  // Update currency selector value
+  const currencySelect = document.getElementById('currencySelect');
+  if (currencySelect) {
+    currencySelect.value = getCurrency();
+  }
 
   if (!profileId) {
     preview.value = JSON.stringify({ message: 'No profile selected' }, null, 2);
@@ -146,7 +174,7 @@ async function handleImportFile(e) {
     await importData(data);
     await loadProfileSelector();
     if (onDataChange) onDataChange();
-    renderData();
+    renderConfig();
     showToast('Data imported successfully!', 'success');
   } catch (err) {
     showToast(`Import failed: ${err.message}`, 'error');
@@ -178,7 +206,7 @@ function handleImportPaste() {
       await importData(data);
       await loadProfileSelector();
       if (onDataChange) onDataChange();
-      renderData();
+      renderConfig();
       modal.close();
       showToast('Data imported successfully!', 'success');
     } catch (err) {
@@ -202,7 +230,7 @@ async function handleLoadSample() {
     setActiveProfileId(sampleData.profiles[0].id);
     await loadProfileSelector();
     if (onDataChange) onDataChange();
-    renderData();
+    renderConfig();
     showToast('Sample data loaded!', 'success');
   } catch (err) {
     showToast(`Failed: ${err.message}`, 'error');
@@ -222,7 +250,7 @@ async function handleClearData() {
   localStorage.removeItem('tyb_active_profile');
   await loadProfileSelector();
   if (onDataChange) onDataChange();
-  renderData();
+  renderConfig();
   showToast('All data cleared', 'success');
 }
 
@@ -267,4 +295,4 @@ function generateSampleData() {
   };
 }
 
-export { initDataView, renderData, setDataChangeCallback };
+export { initConfigView, renderConfig, setDataChangeCallback };

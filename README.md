@@ -9,6 +9,7 @@ A lightweight, offline-first Progressive Web App (PWA) for monthly budget tracki
 - **Budget Item Templates** — Define recurring expenses with flexible frequencies (One Time, Weekly, Bi-Weekly, Monthly, Quarterly, Yearly)
 - **End Date Support** — Optionally set an end date on budget items to stop generating transactions after a certain date
 - **Categories & Sub-categories** — Organize budget items hierarchically
+- **Category Movement** — Move categories between root and sub-category levels via parent dropdown
 - **Auto Default Category** — A "General" category is created automatically with new profiles
 - **Multiple Profiles** — Separate budgets for different contexts (Personal, Family, etc.)
 - **Currency Selection** — 20 currencies supported with auto-detection based on locale
@@ -21,7 +22,7 @@ A lightweight, offline-first Progressive Web App (PWA) for monthly budget tracki
 
 ### Productivity
 - **Search & Filter** — Filter transactions on the Home view or budget items on the Items view
-- **Keyboard Shortcuts** — Navigate tabs (`1`–`5`), switch months (`←` `→`), go to today (`T`), create new (`N`), search (`/`), help (`?`)
+- **Keyboard Shortcuts** — Navigate tabs (`1`–`5`: Home, Items, Categories, Profiles, Config), switch months (`←` `→`), go to today (`T`), create new (`N`), search (`/`), help (`?`)
 - **CSV Export** — Download budget items as a `.csv` file alongside the existing JSON export
 
 ### Design & Platform
@@ -88,7 +89,10 @@ Then open `http://localhost:8080` in your browser.
 │       ├── home.js             # Checklist (transactions)
 │       ├── items.js            # Budget items management
 │       ├── categories.js       # Categories management
-│       └── data.js             # Import/export/settings
+│       └── data.js             # Config: currency, import/export, tools
+├── docs/
+│   ├── ARCHITECTURE.md          # Architecture index
+│   └── architecture/            # Split architecture spec files
 ├── icons/
 │   ├── icon-192.png
 │   └── icon-512.png
@@ -108,10 +112,10 @@ Then open `http://localhost:8080` in your browser.
 
 | Key | Action |
 |-----|--------|
-| `1`–`5` | Switch tabs (Home, Items, Categories, Data, Profiles) |
+| `1`–`5` | Switch tabs (Home, Items, Categories, Profiles, Config) |
 | `←` `→` | Previous / next month (Home view) |
 | `T` | Jump to current month |
-| `N` | New item or category (context-aware) |
+| `N` | New item, category, or profile (context-aware) |
 | `/` | Focus the search bar |
 | `?` | Show shortcuts overlay |
 | `Esc` | Dismiss overlay or blur input |

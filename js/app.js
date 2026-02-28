@@ -8,12 +8,13 @@ import {
   setupProfileManager,
   setProfileChangeCallback,
   ensureDefaultProfile,
+  initProfilesView,
   renderProfiles,
 } from './components/profile.js';
 import { initHomeView, renderHome } from './views/home.js';
 import { initItemsView, renderItems } from './views/items.js';
 import { initCategoriesView, renderCategories } from './views/categories.js';
-import { initDataView, renderData, setDataChangeCallback } from './views/data.js';
+import { initConfigView, renderConfig, setDataChangeCallback } from './views/data.js';
 
 // Current active view
 let currentView = 'viewHome';
@@ -23,8 +24,8 @@ const viewRenderers = {
   viewHome: renderHome,
   viewItems: renderItems,
   viewCategories: renderCategories,
-  viewData: renderData,
   viewProfiles: renderProfiles,
+  viewConfig: renderConfig,
 };
 
 // Navigation
@@ -50,6 +51,8 @@ function setupNavigation() {
         document.getElementById('fabAddItem').style.display = 'flex';
       } else if (viewId === 'viewCategories') {
         document.getElementById('fabAddCategory').style.display = 'flex';
+      } else if (viewId === 'viewProfiles') {
+        document.getElementById('fabAddProfile').style.display = 'flex';
       }
 
       currentView = viewId;
@@ -98,7 +101,8 @@ async function init() {
     initHomeView();
     initItemsView();
     initCategoriesView();
-    initDataView();
+    initProfilesView();
+    initConfigView();
 
     // Setup navigation
     setupNavigation();
@@ -106,6 +110,7 @@ async function init() {
     // Initial FAB visibility
     document.getElementById('fabAddItem').style.display = 'none';
     document.getElementById('fabAddCategory').style.display = 'none';
+    document.getElementById('fabAddProfile').style.display = 'none';
 
     // Render home view
     renderHome();
@@ -153,7 +158,7 @@ async function init() {
       }
 
       // Tab navigation: 1-5
-      const navKeys = { '1': 'viewHome', '2': 'viewItems', '3': 'viewCategories', '4': 'viewData', '5': 'viewProfiles' };
+      const navKeys = { '1': 'viewHome', '2': 'viewItems', '3': 'viewCategories', '4': 'viewProfiles', '5': 'viewConfig' };
       if (navKeys[e.key]) {
         e.preventDefault();
         const navItem = document.querySelector(`.nav-item[data-view="${navKeys[e.key]}"]`);
@@ -182,13 +187,15 @@ async function init() {
         return;
       }
 
-      // N = New item or category
+      // N = New item, category, or profile
       if (e.key === 'n' || e.key === 'N') {
         e.preventDefault();
         if (currentView === 'viewItems') {
           document.getElementById('fabAddItem').click();
         } else if (currentView === 'viewCategories') {
           document.getElementById('fabAddCategory').click();
+        } else if (currentView === 'viewProfiles') {
+          document.getElementById('fabAddProfile').click();
         }
         return;
       }

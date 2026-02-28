@@ -130,11 +130,6 @@ async function renderProfiles() {
   if (!container) return;
 
   const profiles = await dbGetAll(STORES.PROFILES);
-  const currentCurrency = getCurrency();
-
-  const currencyOptionsHTML = CURRENCY_OPTIONS.map(
-    c => `<option value="${c.code}" ${c.code === currentCurrency ? 'selected' : ''}>${c.symbol} — ${c.name} (${c.code})</option>`
-  ).join('');
 
   const listHTML = profiles
     .map(
@@ -160,53 +155,10 @@ async function renderProfiles() {
 
   container.innerHTML = `
     <div class="data-section">
-      <div class="data-section__title">Currency</div>
-      <div class="form-group">
-        <label for="currencySelect">Display Currency</label>
-        <select id="currencySelect">${currencyOptionsHTML}</select>
-      </div>
-    </div>
-    <div class="data-section">
       <div class="data-section__title">Profiles</div>
-      <ul class="profile-list">${listHTML || '<li class="empty-state__desc" style="padding:16px;text-align:center;">No profiles yet</li>'}</ul>
-      <div class="form-group">
-        <label for="newProfileName">New Profile Name</label>
-        <div style="display:flex;gap:8px;">
-          <input type="text" id="newProfileName" placeholder="e.g. Personal, Family" maxlength="50">
-          <button class="btn btn--primary btn--sm" id="btnAddProfile" style="white-space:nowrap;width:auto;padding:8px 16px;">Add</button>
-        </div>
-      </div>
+      <ul class="profile-list">${listHTML || '<li class="empty-state__desc" style="padding:16px;text-align:center;">No profiles yet — tap + to create one</li>'}</ul>
     </div>
   `;
-
-  // Currency change handler
-  container.querySelector('#currencySelect').addEventListener('change', (e) => {
-    setCurrency(e.target.value);
-    if (onProfileChange) onProfileChange();
-    showToast(`Currency set to ${e.target.value}`, 'success');
-  });
-
-  // Add profile
-  container.querySelector('#btnAddProfile').addEventListener('click', async () => {
-    const input = container.querySelector('#newProfileName');
-    const name = input.value.trim();
-    if (!name) {
-      showToast('Please enter a profile name', 'error');
-      return;
-    }
-    const profile = createProfile(name);
-    await dbAdd(STORES.PROFILES, profile);
-    setActiveProfileId(profile.id);
-    await loadProfileSelector();
-    if (onProfileChange) onProfileChange();
-    showToast(`Profile "${name}" created`, 'success');
-    renderProfiles();
-  });
-
-  // Enter key for input
-  container.querySelector('#newProfileName').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') container.querySelector('#btnAddProfile').click();
-  });
 
   // Rename & Delete handlers
   container.querySelectorAll('.profile-list__item').forEach((li) => {
@@ -285,6 +237,45 @@ function escapeHTML(str) {
   return div.innerHTML;
 }
 
+function initProfilesView() {
+  document.getElementById('fabAddProfile').addEventListener('click', () => {
+    openProfileForm();
+  });
+}
+
+function openProfileForm() {
+  const contentHTML = `
+    <form id="profileForm">
+      <div class="form-group">
+        <label for="newProfileName">Profile Name *</label>
+        <input type="text" id="newProfileName" required maxlength="50" placeholder="e.g. Personal, Family">
+      </div>
+      <button type="submit" class="btn btn--primary">Create Profile</button>
+    </form>
+  `;
+
+  const modal = openModal('New Profile', contentHTML);
+
+  modal.overlay.querySelector('#profileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = modal.overlay.querySelector('#newProfileName').value.trim();
+    if (!name) {
+      showToast('Please enter a profile name', 'error');
+      return;
+    }
+    const profile = createProfile(name);
+    await dbAdd(STORES.PROFILES, profile);
+    setActiveProfileId(profile.id);
+    await loadProfileSelector();
+    if (onProfileChange) onProfileChange();
+    showToast(`Profile "${name}" created`, 'success');
+    modal.close();
+    renderProfiles();
+  });
+
+  setTimeout(() => modal.overlay.querySelector('#newProfileName').focus(), 100);
+}
+
 // Ensure at least one default profile exists
 async function ensureDefaultProfile() {
   const profiles = await dbGetAll(STORES.PROFILES);
@@ -311,8 +302,10 @@ export {
   setActiveProfileId,
   setProfileChangeCallback,
   ensureDefaultProfile,
+  initProfilesView,
   renderProfiles,
   getCurrency,
+  setCurrency,
   getCurrencyInfo,
   CURRENCY_OPTIONS,
 };

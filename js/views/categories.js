@@ -182,11 +182,35 @@ async function openCategoryForm(existingCategory = null, parentId = null) {
       ? 'Add Sub-category'
       : 'Add Category';
 
+  // Build parent dropdown options for moving categories
+  const allCategories = await getProfileCategories(profileId);
+  const currentParentId = isEdit ? existingCategory.parentId : parentId;
+  // Eligible parents: root categories that are not the category itself and not its children
+  const eligibleParents = allCategories.filter((c) => {
+    if (c.parentId) return false; // only root categories can be parents
+    if (isEdit && c.id === existingCategory.id) return false; // can't be parent of itself
+    return true;
+  });
+
+  const parentOptions = eligibleParents
+    .map(
+      (c) =>
+        `<option value="${c.id}" ${currentParentId === c.id ? 'selected' : ''}>${escapeHTML(c.name)}</option>`
+    )
+    .join('');
+
   const contentHTML = `
     <form id="categoryForm">
       <div class="form-group">
         <label for="catName">Name *</label>
         <input type="text" id="catName" required maxlength="50" value="${existingCategory ? escapeAttr(existingCategory.name) : ''}" placeholder="e.g. Housing, Transportation">
+      </div>
+      <div class="form-group">
+        <label for="catParent">Parent Category</label>
+        <select id="catParent">
+          <option value="" ${!currentParentId ? 'selected' : ''}>— Root (no parent) —</option>
+          ${parentOptions}
+        </select>
       </div>
       <div class="form-group">
         <label for="catDesc">Description</label>
@@ -203,6 +227,7 @@ async function openCategoryForm(existingCategory = null, parentId = null) {
 
     const name = modal.overlay.querySelector('#catName').value.trim();
     const description = modal.overlay.querySelector('#catDesc').value.trim();
+    const selectedParentId = modal.overlay.querySelector('#catParent').value || null;
 
     if (!name) {
       showToast('Category name is required', 'error');
@@ -210,7 +235,15 @@ async function openCategoryForm(existingCategory = null, parentId = null) {
     }
 
     if (isEdit) {
-      const updated = { ...existingCategory, name, description };
+      // If moving a root category to become a sub-category, re-parent its children to root
+      if (selectedParentId && !existingCategory.parentId) {
+        const children = allCategories.filter((c) => c.parentId === existingCategory.id);
+        for (const child of children) {
+          await dbPut(STORES.CATEGORIES, { ...child, parentId: null });
+        }
+      }
+      // If making a sub-category into root, that's fine — no children to worry about
+      const updated = { ...existingCategory, name, description, parentId: selectedParentId };
       await dbPut(STORES.CATEGORIES, updated);
       showToast(`"${name}" updated`, 'success');
     } else {
@@ -218,7 +251,7 @@ async function openCategoryForm(existingCategory = null, parentId = null) {
         profileId,
         name,
         description,
-        parentId: parentId || null,
+        parentId: selectedParentId,
       });
       await dbAdd(STORES.CATEGORIES, category);
       showToast(`"${name}" added`, 'success');

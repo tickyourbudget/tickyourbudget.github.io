@@ -201,8 +201,27 @@
             </button>
         </section>
 
-        <!-- Data View -->
-        <section class="view" id="viewData" aria-label="Data & Settings">
+        <!-- Profiles View -->
+        <section class="view" id="viewProfiles" aria-label="Profiles">
+            <div class="profiles-view" id="profilesViewContainer"></div>
+            <button class="fab" id="fabAddProfile" aria-label="Add profile">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+            </button>
+        </section>
+
+        <!-- Config View (formerly Data) -->
+        <section class="view" id="viewConfig" aria-label="Config">
+            <div class="data-section">
+                <div class="data-section__title">Currency</div>
+                <div class="form-group">
+                    <label for="currencySelect">Display Currency</label>
+                    <select id="currencySelect"></select>
+                </div>
+            </div>
             <div class="data-section">
                 <div class="data-section__title">JSON Preview</div>
                 <textarea class="json-preview" id="jsonPreview" readonly></textarea>
@@ -271,11 +290,6 @@
             </div>
         </section>
 
-        <!-- Profiles View -->
-        <section class="view" id="viewProfiles" aria-label="Profiles">
-            <div class="profiles-view" id="profilesViewContainer"></div>
-        </section>
-
     </main>
 
     <!-- ===== Bottom Navigation ===== -->
@@ -304,15 +318,6 @@
             </svg>
             <span>Categories</span>
         </button>
-        <button class="nav-item" data-view="viewData" aria-label="Data">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-linecap="round" stroke-linejoin="round">
-                <ellipse cx="12" cy="5" rx="9" ry="3" />
-                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
-                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
-            </svg>
-            <span>Data</span>
-        </button>
         <button class="nav-item" data-view="viewProfiles" aria-label="Profiles">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-linecap="round" stroke-linejoin="round">
@@ -320,6 +325,15 @@
                 <circle cx="12" cy="7" r="4" />
             </svg>
             <span>Profiles</span>
+        </button>
+        <button class="nav-item" data-view="viewConfig" aria-label="Config">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+            <span>Config</span>
         </button>
     </nav>
 
@@ -334,8 +348,8 @@
                 <kbd>1</kbd><span>Home</span>
                 <kbd>2</kbd><span>Items</span>
                 <kbd>3</kbd><span>Categories</span>
-                <kbd>4</kbd><span>Data</span>
-                <kbd>5</kbd><span>Profiles</span>
+                <kbd>4</kbd><span>Profiles</span>
+                <kbd>5</kbd><span>Config</span>
                 <kbd>&larr;</kbd><span>Previous month</span>
                 <kbd>&rarr;</kbd><span>Next month</span>
                 <kbd>T</kbd><span>Go to today</span>
