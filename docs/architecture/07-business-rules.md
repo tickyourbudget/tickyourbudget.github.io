@@ -42,11 +42,24 @@ When a transaction is created, it captures:
 
 After creation, editing the budget item does **NOT** retroactively change existing transactions. Only newly generated transactions will use the updated name/amount.
 
+However, users **can** directly edit a transaction's `snapshotAmount` (see §8.4a). This only changes the individual transaction — the source budget item is never modified.
+
 ## 8.4 Transaction Status Toggle
 
 **Function:** `toggleTransactionStatus(transaction)`
 
 Flips `status` between `"Pending"` ↔ `"Paid"` and persists via `dbPut()`. Returns the updated transaction object.
+
+## 8.4a Transaction Amount Edit
+
+**Function:** `updateTransactionAmount(transaction, newAmount)`
+
+Sets `transaction.snapshotAmount` to the new value and persists via `dbPut()`. The source budget item is **NOT** touched — only this specific transaction's snapshot is changed.
+
+**UI flow:**
+1. User taps the amount on a checklist item (distinguished from the toggle area).
+2. A modal opens with a pre-filled number input.
+3. On submit, `updateTransactionAmount()` is called and `renderHome()` re-renders summaries, progress bar, and chart data.
 
 ## 8.5 Profile Isolation
 

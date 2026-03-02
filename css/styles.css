@@ -557,10 +557,29 @@ textarea {
 }
 
 .checklist-item__amount {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     font-size: 1rem;
     font-weight: 700;
     color: var(--accent);
     white-space: nowrap;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    padding: 2px 6px;
+    margin: -2px -6px;
+    transition: background var(--transition);
+}
+
+.checklist-item__amount:active {
+    background: var(--accent-light);
+}
+
+.checklist-item__amount .edit-icon {
+    width: 12px;
+    height: 12px;
+    opacity: 0.4;
+    flex-shrink: 0;
 }
 
 .checklist-item.checked .checklist-item__amount {

@@ -1,7 +1,7 @@
 // js/views/home.js — Home View (Transactions checklist with chart + progress)
 
 import { getTransactionsForMonth, getProfileCategories, getProfileBudgetItems } from '../db.js';
-import { generateTransactionsForMonth, toggleTransactionStatus } from '../transaction-engine.js';
+import { generateTransactionsForMonth, toggleTransactionStatus, updateTransactionAmount } from '../transaction-engine.js';
 import { formatCurrency, formatDate, getMonthLabel, TX_STATUS } from '../models.js';
 import { getActiveProfileId } from '../components/profile.js';
 import { openModal } from '../components/modal.js';
@@ -196,7 +196,10 @@ async function renderHome() {
             <div class="checklist-item__name">${escapeHTML(txn.snapshotName)}</div>
             <div class="checklist-item__date">${formatDate(txn.date)}</div>
           </div>
-          <div class="checklist-item__amount">${formatCurrency(txn.snapshotAmount)}</div>
+          <div class="checklist-item__amount" data-edit-txn="${txn.id}">
+            <span>${formatCurrency(txn.snapshotAmount)}</span>
+            <svg class="edit-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+          </div>
         </div>
       `;
     }
@@ -205,9 +208,18 @@ async function renderHome() {
 
   container.innerHTML = html;
 
-  // Attach click handlers for toggling
+  // Attach click handlers for toggling & editing
   container.querySelectorAll('.checklist-item').forEach((el) => {
-    el.addEventListener('click', async () => {
+    el.addEventListener('click', async (e) => {
+      // If the amount area was clicked, open edit modal instead of toggling
+      const amountEl = e.target.closest('[data-edit-txn]');
+      if (amountEl) {
+        const txnId = amountEl.dataset.editTxn;
+        const txn = transactions.find((t) => t.id === txnId);
+        if (txn) openEditAmountModal(txn);
+        return;
+      }
+
       const txnId = el.dataset.txnId;
       const txn = transactions.find((t) => t.id === txnId);
       if (!txn) return;
@@ -236,6 +248,29 @@ async function renderHome() {
       progressFill.style.width = newPct + '%';
       progressLabel.textContent = newPct + '% paid';
     });
+  });
+}
+
+function openEditAmountModal(txn) {
+  const html = `
+    <form id="editAmountForm" class="form-group" style="margin-bottom:0">
+      <label for="editAmountInput">Amount</label>
+      <input type="number" id="editAmountInput" step="0.01" min="0" value="${txn.snapshotAmount}" required>
+      <button type="submit" class="btn btn--primary" style="margin-top:16px">Save</button>
+    </form>
+  `;
+
+  const { overlay, close } = openModal('Edit Amount', html);
+  const input = overlay.querySelector('#editAmountInput');
+  setTimeout(() => { input.focus(); input.select(); }, 100);
+
+  overlay.querySelector('#editAmountForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const newAmount = parseFloat(input.value);
+    if (isNaN(newAmount) || newAmount < 0) return;
+    await updateTransactionAmount(txn, newAmount);
+    close();
+    renderHome();
   });
 }
 

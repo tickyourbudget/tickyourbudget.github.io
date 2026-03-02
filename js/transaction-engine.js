@@ -173,8 +173,19 @@ async function toggleTransactionStatus(transaction) {
   return transaction;
 }
 
+/**
+ * Update a transaction's snapshot amount.
+ * Only modifies the transaction — the source budget item is NOT changed.
+ */
+async function updateTransactionAmount(transaction, newAmount) {
+  transaction.snapshotAmount = parseFloat(newAmount);
+  await dbPut(STORES.TRANSACTIONS, transaction);
+  return transaction;
+}
+
 export {
   getOccurrencesInMonth,
   generateTransactionsForMonth,
   toggleTransactionStatus,
+  updateTransactionAmount,
 };

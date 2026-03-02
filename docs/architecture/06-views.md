@@ -100,10 +100,16 @@ Text input with search icon, positioned at the top of the view (right after mont
 ```
 
 **Click behaviour:**
-1. User clicks anywhere on the row.
+1. User clicks anywhere on the row **except the amount** → toggles Paid/Pending status.
 2. Calls `toggleTransactionStatus(transaction)` → flips status in IndexedDB.
 3. Toggles `.checked` CSS class on the element (instant visual feedback).
 4. Recalculates and updates summary bar totals and progress bar.
+
+**Amount edit:**
+1. User taps the amount area (has a small pencil icon hint).
+2. Opens a modal with a pre-filled number input via `openEditAmountModal()`.
+3. On save, calls `updateTransactionAmount()` and re-renders the Home view.
+4. Only the transaction's `snapshotAmount` is changed — the source budget item is unaffected.
 
 **When checked:** Row gets `opacity: 0.65`, name gets `line-through`, check circle fills purple with white checkmark.
 
